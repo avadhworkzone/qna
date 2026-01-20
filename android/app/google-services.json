@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "460260151216",
+    "project_id": "my-qna-hub",
+    "storage_bucket": "my-qna-hub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:460260151216:android:799db55700f043d97a5075",
+        "android_client_info": {
+          "package_name": "com.quahub.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "460260151216-tr73b26rdbvq8jsnlkui7nt899og22m2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAnNko4fopcLBt74ZdXTJFuQ4M39DE_MdQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "460260151216-tr73b26rdbvq8jsnlkui7nt899og22m2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

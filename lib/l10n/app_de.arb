@@ -1,0 +1,19 @@
+{
+  "appTitle": "F&A Geschichten",
+  "askQuestion": "Stellen Sie eine Frage...",
+  "post": "Posten",
+  "writeAnswer": "Schreiben Sie Ihre Antwort...",
+  "send": "Senden",
+  "answers": "Antworten",
+  "noQuestions": "Noch keine Fragen\\nStellen Sie die erste Frage!",
+  "errorLoading": "Fehler beim Laden der Fragen",
+  "selectLanguage": "Sprache auswählen",
+  "signUp": "Registrieren",
+  "signIn": "Anmelden",
+  "email": "E-Mail",
+  "password": "Passwort",
+  "confirmPassword": "Passwort bestätigen",
+  "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
+  "dontHaveAccount": "Haben Sie kein Konto?",
+  "signOut": "Abmelden"
+}

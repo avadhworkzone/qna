@@ -1,0 +1,19 @@
+{
+  "appTitle": "Q&A Stories",
+  "askQuestion": "Ask a question...",
+  "post": "Post",
+  "writeAnswer": "Write your answer...",
+  "send": "Send",
+  "answers": "Answers",
+  "noQuestions": "No questions yet\nPost the first question!",
+  "errorLoading": "Error loading questions",
+  "selectLanguage": "Select Language",
+  "signUp": "Sign Up",
+  "signIn": "Sign In",
+  "email": "Email",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "alreadyHaveAccount": "Already have an account?",
+  "dontHaveAccount": "Don't have an account?",
+  "signOut": "Sign Out"
+}

@@ -1,0 +1,11 @@
+{
+  "appTitle": "Historias de P&R",
+  "askQuestion": "Haz una pregunta...",
+  "post": "Publicar",
+  "writeAnswer": "Escribe tu respuesta...",
+  "send": "Enviar",
+  "answers": "Respuestas",
+  "noQuestions": "No hay preguntas aún\\n¡Publica la primera pregunta!",
+  "errorLoading": "Error al cargar preguntas",
+  "selectLanguage": "Seleccionar idioma"
+}

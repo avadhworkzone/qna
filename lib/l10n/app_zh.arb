@@ -1,0 +1,11 @@
+{
+  "appTitle": "问答故事",
+  "askQuestion": "提出问题...",
+  "post": "发布",
+  "writeAnswer": "写下您的答案...",
+  "send": "发送",
+  "answers": "答案",
+  "noQuestions": "还没有问题\\n发布第一个问题！",
+  "errorLoading": "加载问题时出错",
+  "selectLanguage": "选择语言"
+}
