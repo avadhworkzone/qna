@@ -170,6 +170,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                                       ),
                                       const SizedBox(width: 10),
                                       _AskerAvatars(askers: question.askers),
+                                      const SizedBox(width: 10),
                                     ],
                                   ),
                                   onTap: () => context.go('/question/${question.id}'),
@@ -339,6 +340,16 @@ class _AskerAvatars extends StatelessWidget {
   Widget build(BuildContext context) {
     if (askers.isEmpty) return const SizedBox.shrink();
     final display = askers.take(6).toList();
+    if (display.length == 1) {
+      final asker = display.first;
+      return CircleAvatar(
+        radius: 12,
+        backgroundColor: Colors.white.withOpacity(0.1),
+        backgroundImage:
+            asker.photoUrl != null ? NetworkImage(asker.photoUrl!) : null,
+        child: asker.photoUrl == null ? const Icon(Icons.person, size: 12) : null,
+      );
+    }
     return SizedBox(
       width: 20.0 * display.length,
       height: 28,
@@ -350,16 +361,12 @@ class _AskerAvatars extends StatelessWidget {
               child: CircleAvatar(
                 radius: 12,
                 backgroundColor: Colors.white.withOpacity(0.1),
-                child: ClipOval(
-                  child: display[i].photoUrl != null
-                      ? Image.network(
-                          display[i].photoUrl!,
-                          width: 24,
-                          height: 24,
-                          fit: BoxFit.cover,
-                        )
-                      : const Icon(Icons.person, size: 12),
-                ),
+                backgroundImage: display[i].photoUrl != null
+                    ? NetworkImage(display[i].photoUrl!)
+                    : null,
+                child: display[i].photoUrl == null
+                    ? const Icon(Icons.person, size: 12)
+                    : null,
               ),
             ),
         ],
