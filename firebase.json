@@ -1,1 +1,67 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"my-qna-hub","appId":"1:460260151216:android:799db55700f043d97a5075","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"my-qna-hub","appId":"1:460260151216:ios:50d04fd86e755bc27a5075","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"my-qna-hub","appId":"1:460260151216:ios:50d04fd86e755bc27a5075","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"my-qna-hub","configurations":{"android":"1:460260151216:android:799db55700f043d97a5075","ios":"1:460260151216:ios:50d04fd86e755bc27a5075","macos":"1:460260151216:ios:50d04fd86e755bc27a5075","web":"1:460260151216:web:ec65ef24a9ae4da37a5075","windows":"1:460260151216:web:0be4c86a7d27cf647a5075"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "my-qna-hub",
+          "appId": "1:460260151216:android:799db55700f043d97a5075",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "my-qna-hub",
+          "appId": "1:460260151216:ios:50d04fd86e755bc27a5075",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "my-qna-hub",
+          "appId": "1:460260151216:ios:50d04fd86e755bc27a5075",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "my-qna-hub",
+          "configurations": {
+            "android": "1:460260151216:android:799db55700f043d97a5075",
+            "ios": "1:460260151216:ios:50d04fd86e755bc27a5075",
+            "macos": "1:460260151216:ios:50d04fd86e755bc27a5075",
+            "web": "1:460260151216:web:ec65ef24a9ae4da37a5075",
+            "windows": "1:460260151216:web:0be4c86a7d27cf647a5075"
+          }
+        }
+      }
+    }
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs18"
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "hosting": {
+    "site": "my-qna-hub",
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

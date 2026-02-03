@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid));
+    }
+
+    function isInfluencer() {
+      return isSignedIn() && userDoc(request.auth.uid).data.role == 'influencer';
+    }
+
+    function sessionIsActive(sessionId) {
+      let session = get(/databases/$(database)/documents/sessions/$(sessionId)).data;
+      return session.status == 'active' &&
+        (!('expiryTime' in session) || session.expiryTime == null ||
+          request.time.toMillis() < session.expiryTime);
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow create, update, delete: if isInfluencer() &&
+        request.resource.data.influencerId == request.auth.uid;
+    }
+
+    match /questions/{questionId} {
+      allow read: if true;
+      allow create: if isSignedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        sessionIsActive(request.resource.data.sessionId);
+      allow update: if isInfluencer() ||
+        (isSignedIn() && request.resource.data.userId == request.auth.uid);
+    }
+
+    match /pollResponses/{responseId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        responseId == request.resource.data.sessionId + '_' + request.auth.uid &&
+        sessionIsActive(request.resource.data.sessionId);
+      allow update, delete: if false;
+    }
+  }
+}

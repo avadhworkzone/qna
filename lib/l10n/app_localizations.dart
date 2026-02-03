@@ -5,16 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
-import 'app_localizations_ar.dart';
-import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
-import 'app_localizations_es.dart';
-import 'app_localizations_fr.dart';
-import 'app_localizations_hi.dart';
-import 'app_localizations_ja.dart';
-import 'app_localizations_pt.dart';
-import 'app_localizations_ru.dart';
-import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -71,7 +62,7 @@ import 'app_localizations_zh.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -94,127 +85,20 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[
-    Locale('ar'),
-    Locale('de'),
-    Locale('en'),
-    Locale('es'),
-    Locale('fr'),
-    Locale('hi'),
-    Locale('ja'),
-    Locale('pt'),
-    Locale('ru'),
-    Locale('zh'),
-  ];
+  static const List<Locale> supportedLocales = <Locale>[Locale('en')];
 
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Q&A Stories'**
+  /// **'QA SaaS Platform'**
   String get appTitle;
-
-  /// No description provided for @askQuestion.
-  ///
-  /// In en, this message translates to:
-  /// **'Ask a question...'**
-  String get askQuestion;
-
-  /// No description provided for @post.
-  ///
-  /// In en, this message translates to:
-  /// **'Post'**
-  String get post;
-
-  /// No description provided for @writeAnswer.
-  ///
-  /// In en, this message translates to:
-  /// **'Write your answer...'**
-  String get writeAnswer;
-
-  /// No description provided for @send.
-  ///
-  /// In en, this message translates to:
-  /// **'Send'**
-  String get send;
-
-  /// No description provided for @answers.
-  ///
-  /// In en, this message translates to:
-  /// **'Answers'**
-  String get answers;
-
-  /// No description provided for @noQuestions.
-  ///
-  /// In en, this message translates to:
-  /// **'No questions yet\nPost the first question!'**
-  String get noQuestions;
-
-  /// No description provided for @errorLoading.
-  ///
-  /// In en, this message translates to:
-  /// **'Error loading questions'**
-  String get errorLoading;
-
-  /// No description provided for @selectLanguage.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Language'**
-  String get selectLanguage;
-
-  /// No description provided for @signUp.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign Up'**
-  String get signUp;
-
-  /// No description provided for @signIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign In'**
-  String get signIn;
-
-  /// No description provided for @email.
-  ///
-  /// In en, this message translates to:
-  /// **'Email'**
-  String get email;
-
-  /// No description provided for @password.
-  ///
-  /// In en, this message translates to:
-  /// **'Password'**
-  String get password;
-
-  /// No description provided for @confirmPassword.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Password'**
-  String get confirmPassword;
-
-  /// No description provided for @alreadyHaveAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Already have an account?'**
-  String get alreadyHaveAccount;
-
-  /// No description provided for @dontHaveAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Don\'t have an account?'**
-  String get dontHaveAccount;
-
-  /// No description provided for @signOut.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign Out'**
-  String get signOut;
 }
 
 class _AppLocalizationsDelegate
@@ -227,18 +111,8 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) => <String>[
-    'ar',
-    'de',
-    'en',
-    'es',
-    'fr',
-    'hi',
-    'ja',
-    'pt',
-    'ru',
-    'zh',
-  ].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -247,32 +121,13 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar':
-      return AppLocalizationsAr();
-    case 'de':
-      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
-    case 'es':
-      return AppLocalizationsEs();
-    case 'fr':
-      return AppLocalizationsFr();
-    case 'hi':
-      return AppLocalizationsHi();
-    case 'ja':
-      return AppLocalizationsJa();
-    case 'pt':
-      return AppLocalizationsPt();
-    case 'ru':
-      return AppLocalizationsRu();
-    case 'zh':
-      return AppLocalizationsZh();
   }
 
   throw FlutterError(
-    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
-  );
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }
