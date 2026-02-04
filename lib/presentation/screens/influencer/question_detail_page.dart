@@ -6,7 +6,6 @@ import '../../../core/constants/firestore_paths.dart';
 import '../../../core/di/service_locator.dart';
 import '../../../domain/entities/question.dart';
 import '../../../data/models/question_model.dart';
-import '../../layouts/influencer_shell.dart';
 import '../../widgets/glass_card.dart';
 
 class QuestionDetailPage extends StatelessWidget {
@@ -17,76 +16,68 @@ class QuestionDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firestore = sl<FirebaseFirestore>();
-    return InfluencerShell(
-      title: 'Question Details',
-      body: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        future: firestore.collection(FirestorePaths.questions).doc(questionId).get(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final data = snapshot.data!.data();
-          if (data == null) {
-            return const Center(child: Text('Question not found.'));
-          }
-          final question = QuestionModel.fromFirestore(data, snapshot.data!.id);
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GlassCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(question.questionText,
-                        style: Theme.of(context).textTheme.headlineMedium),
-                    const SizedBox(height: 8),
-                    Text(
-                      [
-                        if (question.createdByName != null) question.createdByName!,
-                        if (question.createdByEmail != null) question.createdByEmail!,
-                      ].join(' • '),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
+    return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      future: firestore.collection(FirestorePaths.questions).doc(questionId).get(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final data = snapshot.data!.data();
+        if (data == null) {
+          return const Center(child: Text('Question not found.'));
+        }
+        final question = QuestionModel.fromFirestore(data, snapshot.data!.id);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GlassCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(question.questionText,
+                      style: Theme.of(context).textTheme.headlineMedium),
+                  const SizedBox(height: 8),
+                  Text(
+                    [
+                      if (question.createdByName != null) question.createdByName!,
+                      if (question.createdByEmail != null) question.createdByEmail!,
+                    ].join(' • '),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              Text(
-                'People who asked this',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: ListView.separated(
-                  itemCount: question.askers.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final asker = question.askers[index];
-                    return GlassCard(
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: asker.photoUrl != null
-                              ? NetworkImage(asker.photoUrl!)
-                              : null,
-                          child: asker.photoUrl == null
-                              ? const Icon(Icons.person)
-                              : null,
-                        ),
-                        title: Text(asker.name ?? 'User'),
-                        subtitle: Text(asker.email ?? asker.userId),
-                        trailing: TextButton(
-                          onPressed: () => context.pop(),
-                          child: const Text('Back'),
-                        ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'People who asked this',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: ListView.separated(
+                itemCount: question.askers.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final asker = question.askers[index];
+                  return GlassCard(
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: asker.photoUrl != null
+                            ? NetworkImage(asker.photoUrl!)
+                            : null,
+                        child:
+                            asker.photoUrl == null ? const Icon(Icons.person) : null,
                       ),
-                    );
-                  },
-                ),
+                      title: Text(asker.name ?? 'User'),
+                      subtitle: Text(asker.email ?? asker.userId),
+                    ),
+                  );
+                },
               ),
-            ],
-          );
-        },
-      ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -36,7 +36,9 @@ class QASaaSApp extends StatelessWidget {
       ],
       child: MaterialApp.router(
         title: 'QA SaaS Platform',
-        theme: AppTheme.darkTheme,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
         routerConfig: router,
         debugShowCheckedModeBanner: false,
       ),

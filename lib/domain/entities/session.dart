@@ -6,7 +6,9 @@ class Session {
   final SessionType type;
   final String publicLink;
   final DateTime createdAt;
+  final DateTime? startTime;
   final DateTime? expiryTime;
+  final DateTime? deletedAt;
   final SessionStatus status;
   final bool isAnonymous;
   final int totalQuestions;
@@ -24,7 +26,9 @@ class Session {
     required this.type,
     required this.publicLink,
     required this.createdAt,
+    this.startTime,
     this.expiryTime,
+    this.deletedAt,
     required this.status,
     this.isAnonymous = false,
     this.totalQuestions = 0,
@@ -43,7 +47,9 @@ class Session {
     SessionType? type,
     String? publicLink,
     DateTime? createdAt,
+    DateTime? startTime,
     DateTime? expiryTime,
+    DateTime? deletedAt,
     SessionStatus? status,
     bool? isAnonymous,
     int? totalQuestions,
@@ -61,7 +67,9 @@ class Session {
       type: type ?? this.type,
       publicLink: publicLink ?? this.publicLink,
       createdAt: createdAt ?? this.createdAt,
+      startTime: startTime ?? this.startTime,
       expiryTime: expiryTime ?? this.expiryTime,
+      deletedAt: deletedAt ?? this.deletedAt,
       status: status ?? this.status,
       isAnonymous: isAnonymous ?? this.isAnonymous,
       totalQuestions: totalQuestions ?? this.totalQuestions,
@@ -74,8 +82,8 @@ class Session {
     );
   }
 
-  bool get isActive => status == SessionStatus.active && 
-    (expiryTime == null || DateTime.now().isBefore(expiryTime!));
+  bool get isActive => status == SessionStatus.active &&
+      (expiryTime == null || DateTime.now().isBefore(expiryTime!));
 }
 
 enum SessionType {

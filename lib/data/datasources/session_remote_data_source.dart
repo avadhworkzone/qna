@@ -44,6 +44,7 @@ class SessionRemoteDataSource {
       type: session.type,
       publicLink: publicLink,
       createdAt: DateTime.now(),
+      startTime: session.startTime,
       expiryTime: session.expiryTime,
       status: session.status,
       isAnonymous: session.isAnonymous,
@@ -53,6 +54,7 @@ class SessionRemoteDataSource {
       influencerName: session.influencerName,
       influencerPhotoUrl: session.influencerPhotoUrl,
       allowMultipleQuestions: session.allowMultipleQuestions,
+      deletedAt: session.deletedAt,
     );
     await docRef.set(model.toFirestore());
     return model;
@@ -70,6 +72,7 @@ class SessionRemoteDataSource {
           type: session.type,
           publicLink: session.publicLink,
           createdAt: session.createdAt,
+          startTime: session.startTime,
           expiryTime: session.expiryTime,
           status: session.status,
           isAnonymous: session.isAnonymous,
@@ -79,7 +82,15 @@ class SessionRemoteDataSource {
           influencerName: session.influencerName,
           influencerPhotoUrl: session.influencerPhotoUrl,
           allowMultipleQuestions: session.allowMultipleQuestions,
+          deletedAt: session.deletedAt,
         ).toFirestore());
+  }
+
+  Future<void> softDeleteSession(String sessionId) {
+    return _firestore.collection(FirestorePaths.sessions).doc(sessionId).update({
+      'status': SessionStatus.ended.name,
+      'deletedAt': DateTime.now().millisecondsSinceEpoch,
+    });
   }
 
   Future<void> endSession(String sessionId) {
@@ -97,7 +108,9 @@ class SessionRemoteDataSource {
         .get();
     if (snapshot.docs.isEmpty) return null;
     final doc = snapshot.docs.first;
-    return SessionModel.fromFirestore(doc.data(), doc.id);
+    final session = SessionModel.fromFirestore(doc.data(), doc.id);
+    if (session.deletedAt != null) return null;
+    return session;
   }
 
   Future<Session?> getSessionById(String sessionId) async {

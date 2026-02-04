@@ -33,6 +33,11 @@ class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
+  Future<void> softDeleteSession(String sessionId) {
+    return _remote.softDeleteSession(sessionId);
+  }
+
+  @override
   Future<Session?> getSessionByPublicLink(String publicLink) {
     return _remote.getSessionByPublicLink(publicLink);
   }

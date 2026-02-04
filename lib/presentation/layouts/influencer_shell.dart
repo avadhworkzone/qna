@@ -7,46 +7,93 @@ import '../bloc/auth/auth_cubit.dart';
 import '../bloc/auth/auth_state.dart';
 import '../widgets/glass_card.dart';
 
-class InfluencerShell extends StatelessWidget {
+class InfluencerShell extends StatefulWidget {
   const InfluencerShell({
     super.key,
-    required this.title,
-    required this.body,
-    this.actions,
-    this.floatingActionButton,
+    required this.child,
   });
 
-  final String title;
-  final Widget body;
-  final List<Widget>? actions;
-  final Widget? floatingActionButton;
+  final Widget child;
+
+  @override
+  State<InfluencerShell> createState() => _InfluencerShellState();
+}
+
+class _InfluencerShellState extends State<InfluencerShell> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  String _titleForLocation(String location) {
+    if (location.startsWith('/session/create')) return 'Create Session';
+    if (location.startsWith('/session/')) return 'Session Details';
+    if (location.startsWith('/sessions')) return 'All Sessions';
+    if (location.startsWith('/question/')) return 'Question Details';
+    if (location.startsWith('/billing')) return 'Subscription Plans';
+    return 'Influencer Dashboard';
+  }
 
   @override
   Widget build(BuildContext context) {
     const sidebarWidth = 280.0;
+    final isDesktop = MediaQuery.of(context).size.width >= 980;
+    final location = GoRouterState.of(context).uri.toString();
+    final title = _titleForLocation(location);
     return Scaffold(
-      drawer: Drawer(
-        child: _SidebarContent(onClose: () => Navigator.of(context).pop()),
-      ),
+      key: _scaffoldKey,
+      drawer: isDesktop
+          ? null
+          : Drawer(
+              child: _SidebarContent(onClose: () => Navigator.of(context).pop()),
+            ),
       appBar: AppBar(
         title: Text(title),
-        actions: actions,
+        actions: [
+          IconButton(
+            onPressed: () => context.go('/billing'),
+            icon: const Icon(Icons.credit_card),
+          ),
+          IconButton(
+            onPressed: () => context.read<AuthCubit>().signOut(),
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+        leading: isDesktop
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () {
+                  if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+                    Navigator.of(context).pop();
+                  } else {
+                    _scaffoldKey.currentState?.openDrawer();
+                  }
+          },
+        ),
       ),
-      floatingActionButton: floatingActionButton,
+      floatingActionButton: location == '/dashboard'
+          ? FloatingActionButton.extended(
+              onPressed: () => context.go('/session/create'),
+              label: const Text('Create Session'),
+              icon: const Icon(Icons.add),
+            )
+          : null,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0B1021),
-              Color(0xFF0F1B33),
-            ],
+            colors: Theme.of(context).brightness == Brightness.light
+                ? [
+                    const Color(0xFFF7F8FB),
+                    const Color(0xFFEFF2F8),
+                  ]
+                : [
+                    const Color(0xFF0B1021),
+                    const Color(0xFF0F1B33),
+                  ],
           ),
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isDesktop = constraints.maxWidth >= 980;
             return Row(
               children: [
                 if (isDesktop)
@@ -57,7 +104,10 @@ class InfluencerShell extends StatelessWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(20),
-                    child: body,
+                    child: KeyedSubtree(
+                      key: ValueKey(location),
+                      child: widget.child,
+                    ),
                   ),
                 ),
               ],
@@ -78,14 +128,19 @@ class _SidebarContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = context.watch<AuthCubit>().state.user;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0B1021),
-            Color(0xFF161B2C),
-          ],
+          colors: Theme.of(context).brightness == Brightness.light
+              ? [
+                  const Color(0xFFFFFFFF),
+                  const Color(0xFFF2F5FA),
+                ]
+              : [
+                  const Color(0xFF0B1021),
+                  const Color(0xFF161B2C),
+                ],
         ),
       ),
       child: SafeArea(
@@ -152,6 +207,14 @@ class _SidebarContent extends StatelessWidget {
               onTap: () {
                 if (onClose != null) onClose!();
                 context.go('/billing');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_forever),
+              title: const Text('Deleted Sessions'),
+              onTap: () {
+                if (onClose != null) onClose!();
+                context.go('/deleted-sessions');
               },
             ),
             const Spacer(),

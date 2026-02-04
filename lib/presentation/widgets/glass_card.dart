@@ -15,7 +15,9 @@ class GlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: AppTheme.glassMorphismDecoration,
+      decoration: Theme.of(context).brightness == Brightness.light
+          ? AppTheme.glassMorphismDecorationLight
+          : AppTheme.glassMorphismDecoration,
       padding: padding,
       child: child,
     );

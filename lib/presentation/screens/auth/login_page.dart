@@ -17,6 +17,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -24,8 +25,10 @@ class _LoginPageState extends State<LoginPage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppTheme.backgroundColor,
-              AppTheme.surfaceColor.withOpacity(0.95),
+              isLight ? const Color(0xFFF7F8FB) : AppTheme.backgroundColor,
+              isLight
+                  ? const Color(0xFFFFFFFF)
+                  : AppTheme.surfaceColor.withOpacity(0.95),
             ],
           ),
         ),
@@ -39,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: 260,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppTheme.accentColor.withOpacity(0.15),
+                  color: AppTheme.accentColor.withOpacity(isLight ? 0.12 : 0.15),
                 ),
               ),
             ),
@@ -51,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: 220,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppTheme.secondaryColor.withOpacity(0.12),
+                  color: AppTheme.secondaryColor.withOpacity(isLight ? 0.1 : 0.12),
                 ),
               ),
             ),

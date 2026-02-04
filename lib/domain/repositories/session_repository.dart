@@ -6,6 +6,7 @@ abstract class SessionRepository {
   Future<Session> createSession(Session session);
   Future<void> updateSession(Session session);
   Future<void> endSession(String sessionId);
+  Future<void> softDeleteSession(String sessionId);
   Future<Session?> getSessionByPublicLink(String publicLink);
   Future<Session?> getSessionById(String sessionId);
 }

@@ -9,7 +9,9 @@ class SessionModel extends Session {
     required super.type,
     required super.publicLink,
     required super.createdAt,
+    super.startTime,
     super.expiryTime,
+    super.deletedAt,
     required super.status,
     super.isAnonymous,
     super.totalQuestions,
@@ -34,9 +36,19 @@ class SessionModel extends Session {
       createdAt: DateTime.fromMillisecondsSinceEpoch(
         (data['createdAt'] as num?)?.toInt() ?? 0,
       ),
+      startTime: data['startTime'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              (data['startTime'] as num?)?.toInt() ?? 0,
+            )
+          : null,
       expiryTime: data['expiryTime'] != null
           ? DateTime.fromMillisecondsSinceEpoch(
               (data['expiryTime'] as num?)?.toInt() ?? 0,
+            )
+          : null,
+      deletedAt: data['deletedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              (data['deletedAt'] as num?)?.toInt() ?? 0,
             )
           : null,
       status: SessionStatus.values.firstWhere(
@@ -61,7 +73,9 @@ class SessionModel extends Session {
       'type': type.name,
       'publicLink': publicLink,
       'createdAt': createdAt.millisecondsSinceEpoch,
+      'startTime': startTime?.millisecondsSinceEpoch,
       'expiryTime': expiryTime?.millisecondsSinceEpoch,
+      'deletedAt': deletedAt?.millisecondsSinceEpoch,
       'status': status.name,
       'isAnonymous': isAnonymous,
       'totalQuestions': totalQuestions,

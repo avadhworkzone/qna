@@ -4,18 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/di/service_locator.dart';
 import '../../../domain/entities/session.dart';
 import '../../../domain/entities/question.dart';
 import '../../../domain/repositories/session_repository.dart';
-import '../../layouts/influencer_shell.dart';
 import '../../bloc/polls/polls_cubit.dart';
 import '../../bloc/polls/polls_state.dart';
 import '../../bloc/questions/questions_cubit.dart';
 import '../../bloc/questions/questions_state.dart';
-import '../../layouts/influencer_shell.dart';
 import '../../widgets/glass_card.dart';
 
 class SessionDetailPage extends StatefulWidget {
@@ -68,55 +67,204 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
     );
   }
 
+  Future<void> _confirmDelete(
+    BuildContext context,
+    SessionRepository sessionRepo,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete session?'),
+        content: const Text(
+          'This will move the session to Deleted Sessions. You can still view it later.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await sessionRepo.softDeleteSession(widget.sessionId);
+    if (mounted) {
+      context.go('/deleted-sessions');
+    }
+  }
+
+  Future<void> _showEditDialog(
+    BuildContext context,
+    Session session,
+    SessionRepository sessionRepo,
+  ) async {
+    final titleController = TextEditingController(text: session.title);
+    final descController = TextEditingController(text: session.description);
+    DateTime? start = session.startTime;
+    DateTime? expiry = session.expiryTime;
+
+    Future<void> pickStart() async {
+      final date = await showDatePicker(
+        context: context,
+        firstDate: DateTime.now().subtract(const Duration(days: 1)),
+        lastDate: DateTime.now().add(const Duration(days: 365)),
+      );
+      if (date == null) return;
+      final time = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(start ?? DateTime.now()),
+      );
+      if (time == null) return;
+      start = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    }
+
+    Future<void> pickExpiry() async {
+      final date = await showDatePicker(
+        context: context,
+        firstDate: DateTime.now().subtract(const Duration(days: 1)),
+        lastDate: DateTime.now().add(const Duration(days: 365)),
+      );
+      if (date == null) return;
+      final time = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(expiry ?? DateTime.now()),
+      );
+      if (time == null) return;
+      expiry = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    }
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Session'),
+        content: SizedBox(
+          width: 420,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: descController,
+                decoration: const InputDecoration(labelText: 'Description'),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(start == null ? 'Start not set' : '$start'),
+                  ),
+                  TextButton(onPressed: pickStart, child: const Text('Pick Start')),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(expiry == null ? 'Expiry not set' : '$expiry'),
+                  ),
+                  TextButton(onPressed: pickExpiry, child: const Text('Pick Expiry')),
+                ],
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (saved != true) return;
+    final updated = session.copyWith(
+      title: titleController.text.trim(),
+      description: descController.text.trim(),
+      startTime: start,
+      expiryTime: expiry,
+    );
+    await sessionRepo.updateSession(updated);
+    if (mounted) {
+      setState(() => _sessionOverride = updated);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final sessionRepo = sl<SessionRepository>();
-    return InfluencerShell(
-      title: 'Session Details',
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.link),
-          onPressed: () async {
-            final session = await sessionRepo.getSessionById(widget.sessionId);
-            final publicLink = session == null
-                ? ''
-                : '${AppConstants.publicBaseUrl}/${session.publicLink}';
-            if (publicLink.isNotEmpty) {
-              await Clipboard.setData(ClipboardData(text: publicLink));
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Copied: $publicLink')),
-                );
-              }
-            }
-          },
-        ),
-      ],
-      body: FutureBuilder(
-        future: sessionRepo.getSessionById(widget.sessionId),
-        builder: (context, snapshot) {
-          final session = _sessionOverride ?? snapshot.data;
-          final publicLink = session == null
-              ? ''
-              : '${AppConstants.publicBaseUrl}/${session.publicLink}';
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final isWide = constraints.maxWidth > 900;
-              final questionPanel = GlassCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text('Questions', style: Theme.of(context).textTheme.headlineSmall),
-                        const Spacer(),
-                        Text(
-                          session?.status == SessionStatus.active ? 'Live' : 'Paused',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+    return FutureBuilder(
+      future: sessionRepo.getSessionById(widget.sessionId),
+      builder: (context, snapshot) {
+        final session = _sessionOverride ?? snapshot.data;
+        final publicLink = session == null
+            ? ''
+            : '${AppConstants.publicBaseUrl}/${session.publicLink}';
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth > 900;
+            final headerActions = Row(
+              children: [
+                Text('Session Details',
+                    style: Theme.of(context).textTheme.headlineMedium),
+                const Spacer(),
+                if (publicLink.isNotEmpty)
+                  IconButton(
+                    icon: const Icon(Icons.open_in_new),
+                    onPressed: () async {
+                      final uri = Uri.parse(publicLink);
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    },
+                    tooltip: 'Open Public Link',
+                  ),
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: session == null
+                      ? null
+                      : () => _showEditDialog(context, session, sessionRepo),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: session == null
+                      ? null
+                      : () => _confirmDelete(context, sessionRepo),
+                ),
+              ],
+            );
+            final questionPanel = GlassCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  headerActions,
+                  if (session != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      session.title,
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 4),
+                    Text(
+                      session.description,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  Text(
+                    session?.status == SessionStatus.active ? 'Live' : 'Paused',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 12),
                     Expanded(
                       child: BlocBuilder<QuestionsCubit, QuestionsState>(
                         builder: (context, state) {
@@ -185,47 +333,16 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                 ),
               );
 
-              final sidePanel = Column(
-                children: [
-                  GlassCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Poll Activity',
-                            style: Theme.of(context).textTheme.headlineSmall),
-                        const SizedBox(height: 12),
-                        BlocBuilder<PollsCubit, PollsState>(
-                          builder: (context, state) {
-                            if (state.isLoading) {
-                              return const Center(child: CircularProgressIndicator());
-                            }
-                            return Text('Total votes: ${state.responses.length}');
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                      GlassCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Random Winner',
-                                style: Theme.of(context).textTheme.headlineSmall),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: () {
-                                final askers = context
-                                    .read<QuestionsCubit>()
-                                    .state
-                                    .questions
-                                    .expand((q) => q.askers)
-                                    .toList();
-                                _pickRandomWinnerFromAskers(askers);
-                              },
-                              child: const Text('Pick from Question Askers'),
-                            ),
-                        const SizedBox(height: 12),
+            final sidePanel = Column(
+              children: [
+                GlassCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Random Winner',
+                          style: Theme.of(context).textTheme.headlineSmall),
+                      const SizedBox(height: 12),
+                      if (session?.type == SessionType.poll) ...[
                         ElevatedButton(
                           onPressed: () {
                             final pollIds = context
@@ -238,11 +355,25 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                           },
                           child: const Text('Pick from Poll Participants'),
                         ),
+                      ] else ...[
+                        ElevatedButton(
+                          onPressed: () {
+                            final askers = context
+                                .read<QuestionsCubit>()
+                                .state
+                                .questions
+                                .expand((q) => q.askers)
+                                .toList();
+                            _pickRandomWinnerFromAskers(askers);
+                          },
+                          child: const Text('Pick from Question Askers'),
+                        ),
                       ],
-                    ),
+                    ],
                   ),
-                ],
-              );
+                ),
+              ],
+            );
 
               final content = isWide
                   ? Row(
@@ -284,9 +415,9 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                             child: const Text('Copy'),
                           ),
                           const SizedBox(width: 8),
-                              if (session != null)
-                                ElevatedButton(
-                                  onPressed: () async {
+                        if (session != null && session.deletedAt == null)
+                          ElevatedButton(
+                            onPressed: () async {
                                     final nextStatus = session.status == SessionStatus.active
                                         ? SessionStatus.paused
                                         : SessionStatus.active;
@@ -326,8 +457,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
             },
           );
         },
-      ),
-    );
+      );
   }
 }
 

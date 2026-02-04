@@ -94,21 +94,28 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                   .toList() ??
               [];
           final isActive = session.isActive;
+          final isPollOnly = session.type == SessionType.poll;
           final isAuthed = authState.status == AuthStatus.authenticated &&
               authState.user != null;
           if (_loadedUserId != authState.user?.id) {
             _loadedUserId = authState.user?.id;
             _loadDraft(session.id, _loadedUserId);
           }
+          final isLight = Theme.of(context).brightness == Brightness.light;
           return Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF0B1021),
-                  Color(0xFF111A2F),
-                ],
+                colors: isLight
+                    ? [
+                        const Color(0xFFF7F8FB),
+                        const Color(0xFFFFFFFF),
+                      ]
+                    : [
+                        const Color(0xFF0B1021),
+                        const Color(0xFF111A2F),
+                      ],
               ),
             ),
             child: SafeArea(
@@ -231,6 +238,7 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                             const Text('This session is not live yet.'),
                           ],
                           const SizedBox(height: 24),
+                          if (session.type != SessionType.poll)
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
@@ -491,9 +499,16 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Quick Poll',
+                                      isPollOnly ? 'Vote in the poll' : 'Quick Poll',
                                       style: Theme.of(context).textTheme.headlineSmall,
                                     ),
+                                    if (isPollOnly) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Choose one option below.',
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                    ],
                                     const SizedBox(height: 12),
                                     Wrap(
                                       spacing: 12,
