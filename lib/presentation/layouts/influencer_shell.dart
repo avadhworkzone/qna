@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/constants/app_constants.dart';
 import '../bloc/auth/auth_cubit.dart';
 import '../bloc/auth/auth_state.dart';
 import '../widgets/glass_card.dart';
@@ -258,6 +259,18 @@ class _SidebarContent extends StatelessWidget {
                 context.go('/payments');
               },
             ),
+            if (AppConstants.enableAudiencePools)
+              ListTile(
+                leading: const Icon(Icons.group),
+                title: const Text('Audience Pool'),
+                selected: isSelected('/audience-pool'),
+                selectedTileColor: selectedBg,
+                selectedColor: selectedFg,
+                onTap: () {
+                  if (onClose != null) onClose!();
+                  context.go('/audience-pool');
+                },
+              ),
             const Spacer(),
             Padding(
               padding: const EdgeInsets.all(16),

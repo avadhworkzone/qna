@@ -30,6 +30,40 @@ class QuestionDetailPage extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              future: firestore
+                  .collection(FirestorePaths.sessions)
+                  .doc(question.sessionId)
+                  .get(),
+              builder: (context, sessionSnap) {
+                if (!sessionSnap.hasData || sessionSnap.data?.data() == null) {
+                  return const SizedBox.shrink();
+                }
+                final session = sessionSnap.data!.data()!;
+                return GlassCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Session Details',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        session['title']?.toString() ?? 'Session',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        session['description']?.toString() ?? '',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
             GlassCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

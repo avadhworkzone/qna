@@ -1045,6 +1045,8 @@ file:///Users/avadhkatrodiya/Documents/qna/lib/core/constants/firestore_paths.da
 file:///Users/avadhkatrodiya/Documents/qna/lib/core/di/service_locator.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/core/extensions/session_extensions.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/core/theme/app_theme.dart
+file:///Users/avadhkatrodiya/Documents/qna/lib/core/utils/web_file_picker.dart
+file:///Users/avadhkatrodiya/Documents/qna/lib/core/utils/web_file_picker_selector.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/core/utils/web_redirect.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/core/utils/web_redirect_web.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/core/utils/web_storage.dart
@@ -1096,6 +1098,7 @@ file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/layouts/influencer_s
 file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/routes/app_router.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/routes/go_router_refresh_stream.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/screens/auth/login_page.dart
+file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/screens/influencer/audience_pool_page.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/screens/influencer/billing_page.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/screens/influencer/dashboard_page.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/screens/influencer/deleted_sessions_page.dart
@@ -1104,6 +1107,7 @@ file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/screens/influencer/q
 file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/screens/influencer/session_create_page.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/screens/influencer/session_detail_page.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/screens/influencer/sessions_list_page.dart
+file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/screens/public/join_audience_page.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/screens/public/public_session_page.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/screens/shared/splash_page.dart
 file:///Users/avadhkatrodiya/Documents/qna/lib/presentation/widgets/glass_card.dart

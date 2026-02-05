@@ -348,10 +348,10 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Submit a response',
-                                  style: Theme.of(context).textTheme.headlineSmall,
-                                ),
+                                  Text(
+                                    'Submit a response',
+                                    style: Theme.of(context).textTheme.headlineSmall,
+                                  ),
                                 const SizedBox(height: 12),
                                 TextField(
                                   controller: _questionController,

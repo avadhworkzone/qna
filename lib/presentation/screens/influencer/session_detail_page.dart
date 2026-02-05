@@ -260,9 +260,44 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                     ),
                   ],
                   const SizedBox(height: 8),
-                  Text(
-                    session?.status == SessionStatus.active ? 'Live' : 'Paused',
-                    style: Theme.of(context).textTheme.bodySmall,
+                  Row(
+                    children: [
+                      Text(
+                        session?.status == SessionStatus.active
+                            ? 'Live'
+                            : 'Paused',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const Spacer(),
+                      BlocBuilder<QuestionsCubit, QuestionsState>(
+                        builder: (context, state) {
+                          final unique = <String>{};
+                          for (final q in state.questions) {
+                            unique.add(q.userId);
+                            for (final a in q.askers) {
+                              unique.add(a.userId);
+                            }
+                          }
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.15),
+                              ),
+                            ),
+                            child: Text(
+                              'Participants: ${unique.length}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                     Expanded(

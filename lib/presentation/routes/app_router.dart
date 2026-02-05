@@ -11,11 +11,13 @@ import '../screens/influencer/session_create_page.dart';
 import '../screens/influencer/sessions_list_page.dart';
 import '../screens/influencer/question_detail_page.dart';
 import '../screens/public/public_session_page.dart';
+import '../screens/public/join_audience_page.dart';
 import '../screens/shared/splash_page.dart';
 import '../screens/influencer/billing_page.dart';
 import '../layouts/influencer_shell.dart';
 import '../screens/influencer/deleted_sessions_page.dart';
 import '../screens/influencer/payment_history_page.dart';
+import '../screens/influencer/audience_pool_page.dart';
 import 'go_router_refresh_stream.dart';
 import '../../core/utils/web_storage_selector.dart';
 
@@ -124,12 +126,24 @@ class AppRouter {
                 child: PaymentHistoryPage(),
               ),
             ),
+            GoRoute(
+              path: '/audience-pool',
+              pageBuilder: (context, state) => const NoTransitionPage(
+                child: AudiencePoolPage(),
+              ),
+            ),
           ],
         ),
         GoRoute(
           path: '/public/:publicLink',
           builder: (context, state) => PublicSessionPage(
             publicLink: state.pathParameters['publicLink']!,
+          ),
+        ),
+        GoRoute(
+          path: '/join/:organizerId',
+          builder: (context, state) => JoinAudiencePage(
+            organizerId: state.pathParameters['organizerId']!,
           ),
         ),
       ],

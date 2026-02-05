@@ -185,65 +185,70 @@ class BillingPage extends StatelessWidget {
                     final planKey = entry.key;
                     final description = _planDescription(planKey);
                     final highlight = _planHighlight(planKey);
-                    return GlassCard(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            height: 4,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(999),
-                              gradient: LinearGradient(
-                                colors: _planGradient(planKey),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    return BlocBuilder<BillingCubit, BillingState>(
+                      builder: (context, billingState) {
+                        final isLoading = billingState.isLoading;
+                        return GlassCard(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(plan['name'],
-                                  style: Theme.of(context).textTheme.titleMedium),
-                              Text(
-                                '\$${plan['price']}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.w700),
+                              Container(
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(999),
+                                  gradient: LinearGradient(
+                                    colors: _planGradient(planKey),
+                                  ),
+                                ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text('${plan['sessions']} sessions',
-                              style: Theme.of(context).textTheme.bodySmall),
-                          const SizedBox(height: 6),
-                          Text(
-                            description,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          const SizedBox(height: 8),
-                          Container(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              highlight,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            width: 140,
-                            child: ElevatedButton(
-                            onPressed: () {
+                              const SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(plan['name'],
+                                      style: Theme.of(context).textTheme.titleMedium),
+                                  Text(
+                                    '\$${plan['price']}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.w700),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text('${plan['sessions']} sessions',
+                                  style: Theme.of(context).textTheme.bodySmall),
+                              const SizedBox(height: 6),
+                              Text(
+                                description,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  highlight,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              SizedBox(
+                                width: 140,
+                                child: ElevatedButton(
+                            onPressed: isLoading
+                                ? null
+                                : () {
                               final origin = Uri.base.origin;
                               debugPrint(
                                 'Subscribe clicked: priceId=${plan['priceId']} origin=$origin',
@@ -257,11 +262,19 @@ class BillingPage extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                             ),
-                            child: const Text('Buy Credits'),
+                            child: isLoading
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Text('Buy Credits'),
                           ),
                           ),
                         ],
-                      ),
+                          ),
+                        );
+                      },
                     );
                   }).toList(),
                 );

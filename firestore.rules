@@ -54,5 +54,19 @@ service cloud.firestore {
       allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
       allow create, update, delete: if false;
     }
+
+    match /audiencePools/{organizerId} {
+      allow read: if isSignedIn() && request.auth.uid == organizerId;
+      allow create, update: if isSignedIn() && request.auth.uid == organizerId;
+      allow delete: if false;
+
+      match /members/{memberId} {
+        allow read: if isSignedIn() && request.auth.uid == organizerId;
+        allow create: if request.resource.data.organizerId == organizerId &&
+          request.resource.data.handle is string &&
+          request.resource.data.handle.size() > 0;
+        allow update, delete: if isSignedIn() && request.auth.uid == organizerId;
+      }
+    }
   }
 }

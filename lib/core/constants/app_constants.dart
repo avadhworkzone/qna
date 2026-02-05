@@ -50,4 +50,7 @@ class AppConstants {
   static const double defaultPadding = 16.0;
   static const double defaultRadius = 12.0;
   static const double cardElevation = 4.0;
+
+  // Feature flags
+  static const bool enableAudiencePools = true;
 }
