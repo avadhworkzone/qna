@@ -24,7 +24,7 @@ class QuestionDetailPage extends StatelessWidget {
         }
         final data = snapshot.data!.data();
         if (data == null) {
-          return const Center(child: Text('Question not found.'));
+          return const Center(child: Text('Response not found.'));
         }
         final question = QuestionModel.fromFirestore(data, snapshot.data!.id);
         return Column(
@@ -49,7 +49,7 @@ class QuestionDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'People who asked this',
+              'Respondents who submitted this',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 12),
@@ -68,7 +68,7 @@ class QuestionDetailPage extends StatelessWidget {
                         child:
                             asker.photoUrl == null ? const Icon(Icons.person) : null,
                       ),
-                      title: Text(asker.name ?? 'User'),
+                      title: Text(asker.name ?? 'Respondent'),
                       subtitle: Text(asker.email ?? asker.userId),
                     ),
                   );

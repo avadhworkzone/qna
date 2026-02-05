@@ -1,1 +1,0 @@
- /Users/avadhkatrodiya/Documents/qna/lib/l10n/app_localizations_en.dart /Users/avadhkatrodiya/Documents/qna/lib/l10n/app_localizations.dart:  /Users/avadhkatrodiya/Documents/qna/l10n.yaml /Users/avadhkatrodiya/Documents/qna/lib/l10n/app_en.arb

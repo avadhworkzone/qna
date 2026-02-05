@@ -37,6 +37,9 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
   String? _existingQuestionId;
   String? _loadedUserId;
   bool _hasSubmitted = false;
+  String? _lastSubmittedText;
+  DateTime? _lastSubmittedAt;
+  String? _selectedPollOption;
 
   @override
   void dispose() {
@@ -82,6 +85,79 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
     }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('draft_$sessionId', text);
+  }
+
+  String _formatShort(DateTime? value) {
+    if (value == null) return '';
+    final local = value.toLocal();
+    final day = local.day.toString().padLeft(2, '0');
+    final month = local.month.toString().padLeft(2, '0');
+    final year = local.year.toString();
+    var hour = local.hour;
+    final minute = local.minute.toString().padLeft(2, '0');
+    final isPm = hour >= 12;
+    hour = hour % 12;
+    if (hour == 0) hour = 12;
+    final amPm = isPm ? 'PM' : 'AM';
+    return '$day/$month/$year  $hour:$minute $amPm';
+  }
+
+  Widget _submissionPanel(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isLight
+            ? Colors.black.withOpacity(0.04)
+            : AppTheme.cardColor.withOpacity(0.35),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Your submission',
+              style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 8),
+          if (_lastSubmittedText != null && _lastSubmittedText!.isNotEmpty)
+            Text(
+              _lastSubmittedText!,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          if (_selectedPollOption != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Poll choice: $_selectedPollOption',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text(
+                _formatShort(_lastSubmittedAt),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppTheme.successColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppTheme.successColor.withOpacity(0.4),
+                  ),
+                ),
+                child: Text(
+                  'Submitted',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -164,11 +240,11 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    session.influencerName ?? 'Influencer',
+                                    session.influencerName ?? 'Organizer',
                                     style: Theme.of(context).textTheme.headlineSmall,
                                   ),
                                   Text(
-                                    'Live Q&A',
+                                    'Live Session',
                                     style: Theme.of(context).textTheme.bodySmall,
                                   ),
                                 ],
@@ -273,14 +349,14 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Ask a question',
+                                  'Submit a response',
                                   style: Theme.of(context).textTheme.headlineSmall,
                                 ),
                                 const SizedBox(height: 12),
-                              TextField(
+                                TextField(
                                   controller: _questionController,
                                   decoration: const InputDecoration(
-                                    labelText: 'Type your question',
+                                    labelText: 'Type your response',
                                   ),
                                   onChanged: (value) => _saveDraft(session.id, value),
                                 ),
@@ -323,24 +399,24 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                               );
                                               return;
                                             }
-                                            if (!session.allowMultipleQuestions &&
-                                                _hasSubmitted) {
-                                              messenger.showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                    'Only one question is allowed for this session.',
+                                              if (!session.allowMultipleQuestions &&
+                                                  _hasSubmitted) {
+                                                messenger.showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Only one response is allowed for this session.',
+                                                    ),
                                                   ),
-                                                ),
-                                              );
-                                              return;
-                                            }
+                                                );
+                                                return;
+                                              }
                                             final text =
                                                 _questionController.text.trim();
                                             if (text.isEmpty) {
                                               messenger.showSnackBar(
                                                 const SnackBar(
                                                   content: Text(
-                                                    'Please type a question first.',
+                                                    'Please type a response first.',
                                                   ),
                                                 ),
                                               );
@@ -391,7 +467,7 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                                     messenger.showSnackBar(
                                                       const SnackBar(
                                                         content: Text(
-                                                          'You have already submitted a question.',
+                                                          'You have already submitted a response.',
                                                         ),
                                                       ),
                                                     );
@@ -426,6 +502,8 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                                 if (!session.allowMultipleQuestions) {
                                                   _existingQuestionId = created.id;
                                                   _hasSubmitted = true;
+                                                  _lastSubmittedText = text;
+                                                  _lastSubmittedAt = DateTime.now();
                                                   if (kIsWeb) {
                                                     WebStorage.set(
                                                       'qid_${session.id}_${authState.user!.id}',
@@ -489,7 +567,7 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                                 SnackBar(
                                                   content: Text(
                                                     ok
-                                                        ? 'Feedback submitted'
+                                                        ? 'Response submitted'
                                                         : error ??
                                                             'Submission failed',
                                                   ),
@@ -526,9 +604,13 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                                         !session
                                                             .allowMultipleQuestions
                                                     ? 'Submitted'
-                                                    : 'Submit Question',
+                                                    : 'Submit Response',
                                           ),
                                   ),
+                                if (_hasSubmitted) ...[
+                                  const SizedBox(height: 16),
+                                  _submissionPanel(context),
+                                ],
                               ],
                             ),
                           ),
@@ -618,6 +700,12 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                                         ),
                                                       ),
                                                     );
+                                                  }
+                                                  if (mounted && ok) {
+                                                    setState(() {
+                                                      _selectedPollOption = option;
+                                                      _lastSubmittedAt = DateTime.now();
+                                                    });
                                                   }
                                                 },
                                           child: Text(option),

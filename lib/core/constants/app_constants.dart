@@ -32,7 +32,7 @@ class AppConstants {
   
   // Session Types
   static const List<String> sessionTypes = [
-    'Question Box',
+    'Response Box',
     'Poll',
   ];
   

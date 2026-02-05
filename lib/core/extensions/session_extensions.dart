@@ -4,7 +4,7 @@ extension SessionTypeLabel on SessionType {
   String get label {
     switch (this) {
       case SessionType.questionBox:
-        return 'Question Box';
+        return 'Response Box';
       case SessionType.poll:
         return 'Poll';
       case SessionType.mixedMode:

@@ -189,7 +189,7 @@ class _SessionCreatePageState extends State<SessionCreatePage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Configure your Q&A and go live when ready.',
+                'Configure your session and go live when ready.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 20),
@@ -384,7 +384,7 @@ class _SessionCreatePageState extends State<SessionCreatePage> {
                 style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 12),
             SwitchListTile(
-              title: const Text('Allow Multiple Questions Per User'),
+              title: const Text('Allow Multiple Responses Per Respondent'),
               value: _allowMultipleQuestions,
               onChanged: (value) => setState(() => _allowMultipleQuestions = value),
             ),

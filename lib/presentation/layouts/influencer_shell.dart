@@ -26,9 +26,9 @@ class _InfluencerShellState extends State<InfluencerShell> {
     if (location.startsWith('/session/create')) return 'Create Session';
     if (location.startsWith('/session/')) return 'Session Details';
     if (location.startsWith('/sessions')) return 'All Sessions';
-    if (location.startsWith('/question/')) return 'Question Details';
+    if (location.startsWith('/question/')) return 'Response Details';
     if (location.startsWith('/billing')) return 'Subscription Plans';
-    return 'Influencer Dashboard';
+    return 'Organizer Dashboard';
   }
 
   @override
@@ -172,7 +172,7 @@ class _SidebarContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          user?.name ?? 'Influencer',
+                          user?.name ?? 'Organizer',
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 4),

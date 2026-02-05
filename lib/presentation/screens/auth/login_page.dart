@@ -115,12 +115,12 @@ class _LoginPageState extends State<LoginPage> {
                                     crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
                                       Text(
-                                        'Influencer Sign In',
+                                        'Organizer Sign In',
                                         style: Theme.of(context).textTheme.headlineLarge,
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        'Access your dashboard and create live sessions.',
+                                        'Access your dashboard and run live sessions.',
                                         style: Theme.of(context).textTheme.bodyMedium,
                                       ),
                                       const SizedBox(height: 20),

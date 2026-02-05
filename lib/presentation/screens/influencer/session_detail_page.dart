@@ -275,7 +275,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                               .where((q) => q.duplicateGroupId == null || q.duplicateGroupId == q.id)
                               .toList();
                           if (visibleQuestions.isEmpty) {
-                            return const Center(child: Text('No questions yet.'));
+                            return const Center(child: Text('No responses yet.'));
                           }
                           return ListView.separated(
                             itemCount: visibleQuestions.length,
@@ -339,7 +339,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Random Winner',
+                      Text('Random Selection',
                           style: Theme.of(context).textTheme.headlineSmall),
                       const SizedBox(height: 12),
                       if (session?.type == SessionType.poll) ...[
@@ -366,7 +366,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                                 .toList();
                             _pickRandomWinnerFromAskers(askers);
                           },
-                          child: const Text('Pick from Question Askers'),
+                          child: const Text('Pick from Respondents'),
                         ),
                       ],
                     ],

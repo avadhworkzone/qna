@@ -85,7 +85,7 @@ class _InfluencerDashboardPageState extends State<InfluencerDashboardPage> {
         if (user.role != UserRole.influencer) {
           return Center(
             child: Text(
-              'Audience users should access sessions via public links.',
+              'Respondents should access sessions via public links.',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
           );
