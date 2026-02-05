@@ -36,6 +36,8 @@ class _InfluencerShellState extends State<InfluencerShell> {
     const sidebarWidth = 280.0;
     final isDesktop = MediaQuery.of(context).size.width >= 980;
     final location = GoRouterState.of(context).uri.toString();
+    final user = context.watch<AuthCubit>().state.user;
+    final credits = user?.sessionCredits ?? 0;
     final title = _titleForLocation(location);
     return Scaffold(
       key: _scaffoldKey,
@@ -71,7 +73,9 @@ class _InfluencerShellState extends State<InfluencerShell> {
       ),
       floatingActionButton: location == '/dashboard'
           ? FloatingActionButton.extended(
-              onPressed: () => context.go('/session/create'),
+              onPressed: credits > 0
+                  ? () => context.go('/session/create')
+                  : () => context.go('/billing'),
               label: const Text('Create Session'),
               icon: const Icon(Icons.add),
             )
@@ -127,6 +131,10 @@ class _SidebarContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthCubit>().state.user;
+    final location = GoRouterState.of(context).uri.toString();
+    bool isSelected(String path) => location.startsWith(path);
+    final selectedBg = Theme.of(context).colorScheme.primary.withOpacity(0.18);
+    final selectedFg = Theme.of(context).colorScheme.primary;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -188,6 +196,9 @@ class _SidebarContent extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.dashboard),
               title: const Text('Dashboard'),
+              selected: isSelected('/dashboard'),
+              selectedTileColor: selectedBg,
+              selectedColor: selectedFg,
               onTap: () {
                 if (onClose != null) onClose!();
                 context.go('/dashboard');
@@ -196,14 +207,30 @@ class _SidebarContent extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.add_circle_outline),
               title: const Text('Create Session'),
+              selected: isSelected('/session/create'),
+              selectedTileColor: selectedBg,
+              selectedColor: selectedFg,
               onTap: () {
                 if (onClose != null) onClose!();
+                final credits = context.read<AuthCubit>().state.user?.sessionCredits ?? 0;
+                if (credits <= 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('No credits left. Please purchase a plan.'),
+                    ),
+                  );
+                  context.go('/billing');
+                  return;
+                }
                 context.go('/session/create');
               },
             ),
             ListTile(
               leading: const Icon(Icons.credit_card),
               title: const Text('Billing'),
+              selected: isSelected('/billing'),
+              selectedTileColor: selectedBg,
+              selectedColor: selectedFg,
               onTap: () {
                 if (onClose != null) onClose!();
                 context.go('/billing');
@@ -212,9 +239,23 @@ class _SidebarContent extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.delete_forever),
               title: const Text('Deleted Sessions'),
+              selected: isSelected('/deleted-sessions'),
+              selectedTileColor: selectedBg,
+              selectedColor: selectedFg,
               onTap: () {
                 if (onClose != null) onClose!();
                 context.go('/deleted-sessions');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.receipt_long),
+              title: const Text('Payment History'),
+              selected: isSelected('/payments'),
+              selectedTileColor: selectedBg,
+              selectedColor: selectedFg,
+              onTap: () {
+                if (onClose != null) onClose!();
+                context.go('/payments');
               },
             ),
             const Spacer(),

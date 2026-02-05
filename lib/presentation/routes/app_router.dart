@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/foundation.dart';
 
 import '../bloc/auth/auth_cubit.dart';
 import '../bloc/auth/auth_state.dart';
@@ -14,28 +15,45 @@ import '../screens/shared/splash_page.dart';
 import '../screens/influencer/billing_page.dart';
 import '../layouts/influencer_shell.dart';
 import '../screens/influencer/deleted_sessions_page.dart';
+import '../screens/influencer/payment_history_page.dart';
 import 'go_router_refresh_stream.dart';
+import '../../core/utils/web_storage_selector.dart';
 
 class AppRouter {
   static GoRouter build(AuthCubit authCubit) {
     return GoRouter(
-      initialLocation: '/login',
+      initialLocation: '/',
       refreshListenable: GoRouterRefreshStream(authCubit.stream),
       redirect: (context, state) {
         final authState = authCubit.state;
         final isLoggingIn = state.matchedLocation == '/login';
+        final isRoot = state.matchedLocation == '/';
         final isPublic = state.matchedLocation.startsWith('/public/');
         if (authState.status == AuthStatus.unknown) {
           return null;
         }
         if (authState.status == AuthStatus.unauthenticated) {
-          return isPublic || isLoggingIn ? null : '/login';
+          if (isPublic || isLoggingIn) return null;
+          if (isRoot) return '/login';
+          final from = Uri.encodeComponent(state.uri.toString());
+          if (kIsWeb) {
+            WebStorage.set('post_login_redirect', state.uri.toString());
+          }
+          return '/login?redirect=$from';
         }
         if (authState.status == AuthStatus.authenticated) {
+          if (isRoot) return '/dashboard';
           if (isLoggingIn) {
             final redirectTo = state.uri.queryParameters['redirect'];
             if (redirectTo != null && redirectTo.isNotEmpty) {
               return redirectTo;
+            }
+            if (kIsWeb) {
+              final stored = WebStorage.get('post_login_redirect');
+              if (stored != null && stored.isNotEmpty) {
+                WebStorage.remove('post_login_redirect');
+                return stored;
+              }
             }
             return '/dashboard';
           }
@@ -98,6 +116,12 @@ class AppRouter {
               path: '/deleted-sessions',
               pageBuilder: (context, state) => const NoTransitionPage(
                 child: DeletedSessionsPage(),
+              ),
+            ),
+            GoRoute(
+              path: '/payments',
+              pageBuilder: (context, state) => const NoTransitionPage(
+                child: PaymentHistoryPage(),
               ),
             ),
           ],

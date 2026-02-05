@@ -1,4 +1,5 @@
 abstract class BillingRepository {
   Future<String> startCheckout(String priceId, String successUrl, String cancelUrl);
   Future<void> openCustomerPortal(String returnUrl);
+  Future<Map<String, dynamic>> confirmCheckout(String sessionId);
 }

@@ -50,6 +50,15 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthState(status: AuthStatus.unauthenticated));
   }
 
+  Future<void> refreshProfile() async {
+    final current = state.user;
+    if (current == null) return;
+    try {
+      final profile = await _authRepository.ensureUserProfile(current.role);
+      emit(AuthState(status: AuthStatus.authenticated, user: profile));
+    } catch (_) {}
+  }
+
   @override
   Future<void> close() {
     _subscription?.cancel();

@@ -12,21 +12,21 @@ class AppConstants {
   static const Map<String, Map<String, dynamic>> subscriptionPlans = {
     'starter': {
       'name': 'Starter',
-      'price': 19,
+      'price': 9,
       'sessions': 1,
-      'priceId': 'price_starter_plan_id',
+      'priceId': 'price_1Sx331DMxTH0lAxA48D3occo',
     },
     'growth': {
       'name': 'Growth', 
-      'price': 89,
+      'price': 49,
       'sessions': 5,
-      'priceId': 'price_growth_plan_id',
+      'priceId': 'price_1Sx34DDMxTH0lAxAKSDpslur',
     },
     'pro': {
       'name': 'Pro',
-      'price': 169,
+      'price': 99,
       'sessions': 10,
-      'priceId': 'price_pro_plan_id',
+      'priceId': 'price_1Sx34iDMxTH0lAxARn6ednhK',
     },
   };
   
@@ -34,7 +34,6 @@ class AppConstants {
   static const List<String> sessionTypes = [
     'Question Box',
     'Poll',
-    'Mixed Mode',
   ];
   
   // Question Ranking Weights

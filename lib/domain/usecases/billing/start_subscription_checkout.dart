@@ -12,3 +12,12 @@ class StartSubscriptionCheckout {
     return repository.startCheckout(priceId, successUrl, cancelUrl);
   }
 }
+
+class ConfirmCheckout {
+  final BillingRepository repository;
+  ConfirmCheckout(this.repository);
+
+  Future<Map<String, dynamic>> call({required String sessionId}) {
+    return repository.confirmCheckout(sessionId);
+  }
+}

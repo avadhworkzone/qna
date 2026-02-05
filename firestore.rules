@@ -49,5 +49,10 @@ service cloud.firestore {
         sessionIsActive(request.resource.data.sessionId);
       allow update, delete: if false;
     }
+
+    match /payments/{paymentId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create, update, delete: if false;
+    }
   }
 }

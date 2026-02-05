@@ -94,6 +94,26 @@ class _InfluencerDashboardPageState extends State<InfluencerDashboardPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _DashboardHeader(user: user),
+        if (user.sessionCredits <= 0) ...[
+          const SizedBox(height: 12),
+          GlassCard(
+            child: Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                const Icon(Icons.warning_amber_rounded),
+                const Text(
+                  'You have no session credits left. Purchase a plan to create more sessions.',
+                ),
+                TextButton(
+                  onPressed: () => context.go('/billing'),
+                  child: const Text('View Plans'),
+                ),
+              ],
+            ),
+          ),
+        ],
             const SizedBox(height: 24),
             Row(
               children: [
@@ -199,38 +219,72 @@ class _DashboardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 28,
-          backgroundImage:
-              user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-          child: user.photoUrl == null ? const Icon(Icons.person, size: 28) : null,
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Welcome back', style: Theme.of(context).textTheme.bodySmall),
-            Text(
-              user.name,
-              style: Theme.of(context).textTheme.displaySmall,
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 720;
+          final headerRow = [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 26,
+                  backgroundImage:
+                      user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                  child: user.photoUrl == null
+                      ? const Icon(Icons.person, size: 26)
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Welcome back',
+                        style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      user.name,
+                      style: Theme.of(context).textTheme.displaySmall,
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
-        const Spacer(),
-        GlassCard(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: const [
-              Icon(Icons.auto_graph),
-              SizedBox(width: 8),
-              Text('Engagement Index +12%'),
+            GlassCard(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.account_balance_wallet_outlined),
+                  const SizedBox(width: 8),
+                  Text('Credits: ${user.sessionCredits}'),
+                ],
+              ),
+            ),
+          ];
+
+          if (isNarrow) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                headerRow.first,
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [headerRow[1]],
+                ),
+              ],
+            );
+          }
+
+          return Row(
+            children: [
+              headerRow.first,
+              const Spacer(),
+              headerRow[1],
             ],
-          ),
-        ),
-      ],
-    );
+          );
+        },
+      );
   }
 }
 
@@ -330,20 +384,18 @@ class _FilterChipGroup<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return GlassCard(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text(label, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(width: 8),
           ...items.map((item) {
             final isSelected = item.value == value;
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: ChoiceChip(
-                selected: isSelected,
-                label: Text(item.label),
-                onSelected: (_) => onChanged(item.value),
-              ),
+            return ChoiceChip(
+              selected: isSelected,
+              label: Text(item.label),
+              onSelected: (_) => onChanged(item.value),
             );
           }),
         ],

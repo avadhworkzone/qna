@@ -32,7 +32,9 @@ Future<void> setupServiceLocator() async {
   // Firebase
   sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
-  sl.registerLazySingleton<FirebaseFunctions>(() => FirebaseFunctions.instance);
+  sl.registerLazySingleton<FirebaseFunctions>(
+    () => FirebaseFunctions.instanceFor(region: 'us-central1'),
+  );
 
   // Data sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -48,7 +50,7 @@ Future<void> setupServiceLocator() async {
     () => PollRemoteDataSource(sl<FirebaseFirestore>()),
   );
   sl.registerLazySingleton<BillingRemoteDataSource>(
-    () => BillingRemoteDataSource(sl<FirebaseFunctions>()),
+    () => BillingRemoteDataSource(sl<FirebaseFunctions>(), sl<FirebaseAuth>()),
   );
 
   // Repositories
@@ -76,4 +78,5 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => UpdateQuestionText(sl<QuestionRepository>()));
   sl.registerFactory(() => SubmitPollResponse(sl<PollRepository>()));
   sl.registerFactory(() => StartSubscriptionCheckout(sl<BillingRepository>()));
+  sl.registerFactory(() => ConfirmCheckout(sl<BillingRepository>()));
 }

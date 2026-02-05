@@ -22,6 +22,9 @@ class BillingCubit extends Cubit<BillingState> {
       );
       emit(state.copyWith(isLoading: false, checkoutUrl: url));
     } catch (e) {
+      // Debug log for subscribe failures.
+      // ignore: avoid_print
+      print('Billing checkout error: $e');
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }
   }

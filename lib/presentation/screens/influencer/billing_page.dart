@@ -1,32 +1,114 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/web_redirect.dart';
+import '../../bloc/auth/auth_cubit.dart';
 import '../../bloc/billing/billing_cubit.dart';
 import '../../bloc/billing/billing_state.dart';
 import '../../widgets/glass_card.dart';
+import '../../../core/di/service_locator.dart';
+import '../../../domain/usecases/billing/start_subscription_checkout.dart';
 
 class BillingPage extends StatelessWidget {
   const BillingPage({super.key});
 
+  static String? _lastHandledSessionId;
+
   @override
   Widget build(BuildContext context) {
-    return BlocListener<BillingCubit, BillingState>(
-      listener: (context, state) async {
-        if (state.checkoutUrl != null) {
-          final url = Uri.parse(state.checkoutUrl!);
-          await launchUrl(url, mode: LaunchMode.externalApplication);
-        } else if (state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage!)),
-          );
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!context.mounted) return;
+      final params = Uri.base.queryParameters;
+      final status = params['status'];
+      final sessionId = params['session_id'];
+      if (status == 'success' &&
+          (sessionId == null || sessionId != _lastHandledSessionId)) {
+        _lastHandledSessionId = sessionId;
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment received. Updating credits...')),
+        );
+        if (sessionId != null && sessionId.isNotEmpty) {
+          try {
+            final result = await sl<ConfirmCheckout>().call(sessionId: sessionId);
+            final ok = result['ok'] == true;
+            final added = result['creditsAdded'];
+            final plan = result['plan'];
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(ok
+                    ? 'Credits updated: +$added ($plan).'
+                    : 'Payment received, but credits are pending.'),
+              ),
+            );
+          } catch (e) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Credit update failed: $e')),
+            );
+          }
         }
+        if (!context.mounted) return;
+        await context.read<AuthCubit>().refreshProfile();
+        if (!context.mounted) return;
+        context.go('/billing');
+      } else if (status == 'cancel') {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment cancelled.')),
+        );
+        if (!context.mounted) return;
+        context.go('/billing');
+      }
+    });
+
+    final user = context.watch<AuthCubit>().state.user;
+    final credits = user?.sessionCredits ?? 0;
+
+    return BlocListener<BillingCubit, BillingState>(
+        listener: (context, state) async {
+          if (state.checkoutUrl != null) {
+            if (kIsWeb) {
+              WebRedirect.go(state.checkoutUrl!);
+            } else {
+              final url = Uri.parse(state.checkoutUrl!);
+              final launched =
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+              if (!launched) {
+                WebRedirect.go(state.checkoutUrl!);
+              }
+            }
+          } else if (state.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.errorMessage!)),
+            );
+          }
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Choose your plan', style: Theme.of(context).textTheme.headlineMedium),
+          const SizedBox(height: 16),
+          GlassCard(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Available session credits',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(
+                  credits.toString(),
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 16),
           Expanded(
             child: LayoutBuilder(
@@ -46,13 +128,16 @@ class BillingPage extends StatelessWidget {
                         children: [
                           Text(plan['name'], style: Theme.of(context).textTheme.headlineSmall),
                           const SizedBox(height: 8),
-                          Text('\$${plan['price']} / month'),
+                          Text('\$${plan['price']} one-time'),
                           const SizedBox(height: 8),
                           Text('${plan['sessions']} sessions per month'),
                           const Spacer(),
                           ElevatedButton(
                             onPressed: () {
                               final origin = Uri.base.origin;
+                              debugPrint(
+                                'Subscribe clicked: priceId=${plan['priceId']} origin=$origin',
+                              );
                               context.read<BillingCubit>().startCheckout(
                                     priceId: plan['priceId'],
                                     successUrl: '$origin/billing?status=success',

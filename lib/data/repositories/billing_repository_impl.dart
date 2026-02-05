@@ -15,4 +15,9 @@ class BillingRepositoryImpl implements BillingRepository {
   Future<void> openCustomerPortal(String returnUrl) {
     return _remote.openCustomerPortal(returnUrl);
   }
+
+  @override
+  Future<Map<String, dynamic>> confirmCheckout(String sessionId) {
+    return _remote.confirmCheckout(sessionId);
+  }
 }

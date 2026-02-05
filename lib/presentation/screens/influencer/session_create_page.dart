@@ -196,12 +196,23 @@ class _SessionCreatePageState extends State<SessionCreatePage> {
                 child: ElevatedButton.icon(
                   onPressed: () async {
                     if (!_formKey.currentState!.validate()) return;
-                      if (!_validateTimes()) return;
-                      if (!_validatePollOptions()) return;
-                      final influencerId = authState.user?.id;
-                      if (influencerId == null) return;
-                      final user = authState.user;
-                      final session = Session(
+                    if (!_validateTimes()) return;
+                    if (!_validatePollOptions()) return;
+                    final influencerId = authState.user?.id;
+                    if (influencerId == null) return;
+                    if ((authState.user?.sessionCredits ?? 0) <= 0) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('No credits left. Please purchase a plan.'),
+                          ),
+                        );
+                        context.go('/billing');
+                      }
+                      return;
+                    }
+                    final user = authState.user;
+                    final session = Session(
                       id: '',
                       influencerId: influencerId,
                       title: _titleController.text.trim(),
@@ -223,6 +234,7 @@ class _SessionCreatePageState extends State<SessionCreatePage> {
                         influencerPhotoUrl: user?.photoUrl,
                       );
                     final created = await context.read<SessionsCubit>().create(session);
+                    await context.read<AuthCubit>().refreshProfile();
                     if (mounted && created != null) {
                       context.go('/session/${created.id}');
                     } else if (mounted) {
