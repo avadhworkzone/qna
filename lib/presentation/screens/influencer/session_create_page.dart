@@ -22,6 +22,7 @@ class _SessionCreatePageState extends State<SessionCreatePage> {
   DateTime? _startTime;
   DateTime? _expiryTime;
   bool _allowMultipleQuestions = false;
+  bool _isSubmitting = false;
   final List<TextEditingController> _pollControllers = [
     TextEditingController()
   ];
@@ -162,9 +163,29 @@ class _SessionCreatePageState extends State<SessionCreatePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'New Session',
-                style: Theme.of(context).textTheme.headlineLarge,
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'New Session',
+                      style: Theme.of(context).textTheme.headlineLarge,
+                    ),
+                  ),
+                  if (authState.user != null)
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color:
+                            Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Credits: ${authState.user!.sessionCredits}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 8),
               Text(
@@ -194,7 +215,9 @@ class _SessionCreatePageState extends State<SessionCreatePage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton.icon(
-                  onPressed: () async {
+                  onPressed: _isSubmitting
+                      ? null
+                      : () async {
                     if (!_formKey.currentState!.validate()) return;
                     if (!_validateTimes()) return;
                     if (!_validatePollOptions()) return;
@@ -211,19 +234,21 @@ class _SessionCreatePageState extends State<SessionCreatePage> {
                       }
                       return;
                     }
-                    final user = authState.user;
-                    final session = Session(
-                      id: '',
-                      influencerId: influencerId,
-                      title: _titleController.text.trim(),
-                      description: _descController.text.trim(),
-                      type: _type,
-                      publicLink: '',
-                      createdAt: DateTime.now(),
-                      startTime: _startTime,
-                      expiryTime: _expiryTime,
-                      status: SessionStatus.paused,
-                      isAnonymous: false,
+                    setState(() => _isSubmitting = true);
+                    try {
+                      final user = authState.user;
+                      final session = Session(
+                        id: '',
+                        influencerId: influencerId,
+                        title: _titleController.text.trim(),
+                        description: _descController.text.trim(),
+                        type: _type,
+                        publicLink: '',
+                        createdAt: DateTime.now(),
+                        startTime: _startTime,
+                        expiryTime: _expiryTime,
+                        status: SessionStatus.paused,
+                        isAnonymous: false,
                         allowMultipleQuestions: _allowMultipleQuestions,
                         pollOptions: _type == SessionType.questionBox
                             ? null
@@ -233,16 +258,29 @@ class _SessionCreatePageState extends State<SessionCreatePage> {
                         influencerName: user?.name,
                         influencerPhotoUrl: user?.photoUrl,
                       );
-                    final created = await context.read<SessionsCubit>().create(session);
-                    await context.read<AuthCubit>().refreshProfile();
-                    if (mounted && created != null) {
-                      context.go('/session/${created.id}');
-                    } else if (mounted) {
-                      context.go('/dashboard');
+                      final created =
+                          await context.read<SessionsCubit>().create(session);
+                      await context.read<AuthCubit>().refreshProfile();
+                      if (mounted && created != null) {
+                        context.go('/session/${created.id}');
+                      } else if (mounted) {
+                        context.go('/dashboard');
+                      }
+                    } finally {
+                      if (mounted) {
+                        setState(() => _isSubmitting = false);
+                      }
                     }
                   },
-                  icon: const Icon(Icons.check_circle),
-                  label: const Text('Create Session'),
+                  icon: _isSubmitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.check_circle),
+                  label:
+                      Text(_isSubmitting ? 'Creating...' : 'Create Session'),
                 ),
               ),
             ],

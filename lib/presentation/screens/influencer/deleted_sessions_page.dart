@@ -38,19 +38,59 @@ class DeletedSessionsPage extends StatelessWidget {
                     child: ListTile(
                       title: Text(session.title),
                       subtitle: Text(session.description),
-                      trailing: Icon(
-                        Icons.delete_forever,
-                        color: AppTheme.warningColor,
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            _formatDateTime(session.startTime),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _formatDateTime(session.expiryTime),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
                       ),
-                      onTap: () => context.go('/session/${session.id}'),
-                    ),
-                  );
-                },
-              );
+                    onTap: () => context.go('/session/${session.id}'),
+                  ),
+                );
+              },
+            );
             },
           ),
         ),
       ],
     );
   }
+}
+
+String _formatDateTime(DateTime? value) {
+  if (value == null) return 'Not set';
+  final months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  final local = value.toLocal();
+  final day = local.day.toString().padLeft(2, '0');
+  final month = months[local.month - 1];
+  final year = local.year.toString();
+  var hour = local.hour;
+  final minute = local.minute.toString().padLeft(2, '0');
+  final isPm = hour >= 12;
+  hour = hour % 12;
+  if (hour == 0) hour = 12;
+  final amPm = isPm ? 'PM' : 'AM';
+  return '$day/$month/$year  $hour:$minute $amPm';
 }

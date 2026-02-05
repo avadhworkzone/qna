@@ -18,6 +18,42 @@ class BillingPage extends StatelessWidget {
 
   static String? _lastHandledSessionId;
 
+  String _planDescription(String key) {
+    switch (key) {
+      case 'growth':
+        return 'Best for weekly Q&A sessions and small launches.';
+      case 'pro':
+        return 'Designed for creators running frequent sessions.';
+      case 'starter':
+      default:
+        return 'Perfect for a single Q&A or one-off launch.';
+    }
+  }
+
+  String _planHighlight(String key) {
+    switch (key) {
+      case 'growth':
+        return 'Most popular';
+      case 'pro':
+        return 'Best value';
+      case 'starter':
+      default:
+        return 'Try it once';
+    }
+  }
+
+  List<Color> _planGradient(String key) {
+    switch (key) {
+      case 'growth':
+        return const [Color(0xFFF59E0B), Color(0xFFFCD34D)];
+      case 'pro':
+        return const [Color(0xFF38BDF8), Color(0xFF22D3EE)];
+      case 'starter':
+      default:
+        return const [Color(0xFF22C55E), Color(0xFF86EFAC)];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -92,47 +128,121 @@ class BillingPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Choose your plan', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 16),
-          GlassCard(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Available session credits',
-                  style: Theme.of(context).textTheme.titleMedium,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Billing', style: Theme.of(context).textTheme.displaySmall),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Buy session credits and manage purchases.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
                 ),
-                Text(
-                  credits.toString(),
-                  style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              GlassCard(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.account_balance_wallet_outlined),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Credits',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        Text(
+                          credits.toString(),
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final width = constraints.maxWidth;
-                final crossAxisCount = width > 1000 ? 3 : width > 700 ? 2 : 1;
+                final crossAxisCount = width > 1200 ? 3 : width > 860 ? 2 : 1;
                 return GridView.count(
                   crossAxisCount: crossAxisCount,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 1.1,
+                  childAspectRatio: 2.6,
                   children: AppConstants.subscriptionPlans.entries.map((entry) {
                     final plan = entry.value;
+                    final planKey = entry.key;
+                    final description = _planDescription(planKey);
+                    final highlight = _planHighlight(planKey);
                     return GlassCard(
+                      padding: const EdgeInsets.all(12),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(plan['name'], style: Theme.of(context).textTheme.headlineSmall),
+                          Container(
+                            height: 4,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(999),
+                              gradient: LinearGradient(
+                                colors: _planGradient(planKey),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(plan['name'],
+                                  style: Theme.of(context).textTheme.titleMedium),
+                              Text(
+                                '\$${plan['price']}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w700),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text('${plan['sessions']} sessions',
+                              style: Theme.of(context).textTheme.bodySmall),
+                          const SizedBox(height: 6),
+                          Text(
+                            description,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                           const SizedBox(height: 8),
-                          Text('\$${plan['price']} one-time'),
-                          const SizedBox(height: 8),
-                          Text('${plan['sessions']} sessions per month'),
-                          const Spacer(),
-                          ElevatedButton(
+                          Container(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              highlight,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: 140,
+                            child: ElevatedButton(
                             onPressed: () {
                               final origin = Uri.base.origin;
                               debugPrint(
@@ -144,7 +254,11 @@ class BillingPage extends StatelessWidget {
                                     cancelUrl: '$origin/billing?status=cancel',
                                   );
                             },
-                            child: const Text('Subscribe'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                            ),
+                            child: const Text('Buy Credits'),
+                          ),
                           ),
                         ],
                       ),
