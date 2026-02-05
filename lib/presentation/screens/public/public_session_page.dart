@@ -13,6 +13,7 @@ import '../../../domain/entities/session.dart';
 import '../../../domain/repositories/session_repository.dart';
 import '../../../core/constants/firestore_paths.dart';
 import '../../../core/utils/web_redirect.dart';
+import '../../../core/utils/web_storage_selector.dart';
 import '../../bloc/auth/auth_cubit.dart';
 import '../../bloc/auth/auth_state.dart';
 import '../../bloc/questions/questions_cubit.dart';
@@ -44,7 +45,21 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
   }
 
   Future<void> _loadDraft(String sessionId, String? userId) async {
-    if (kIsWeb) return;
+    if (kIsWeb) {
+      final draftKey = 'draft_$sessionId';
+      final draft = WebStorage.get(draftKey);
+      if (draft != null && draft.isNotEmpty && _questionController.text.isEmpty) {
+        _questionController.text = draft;
+      }
+      if (userId != null) {
+        final qidKey = 'qid_${sessionId}_$userId';
+        _existingQuestionId = WebStorage.get(qidKey);
+        if (_existingQuestionId != null) {
+          _hasSubmitted = true;
+        }
+      }
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     final draftKey = 'draft_$sessionId';
     final draft = prefs.getString(draftKey);
@@ -61,7 +76,10 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
   }
 
   Future<void> _saveDraft(String sessionId, String text) async {
-    if (kIsWeb) return;
+    if (kIsWeb) {
+      WebStorage.set('draft_$sessionId', text);
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('draft_$sessionId', text);
   }
@@ -204,6 +222,11 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                       await prefs.remove(
                                         'qid_${session.id}_${authState.user!.id}',
                                       );
+                                    } else {
+                                      WebStorage.remove('draft_${session.id}');
+                                      WebStorage.remove(
+                                        'qid_${session.id}_${authState.user!.id}',
+                                      );
                                     }
                                     if (mounted) {
                                       setState(() {
@@ -254,7 +277,7 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                   style: Theme.of(context).textTheme.headlineSmall,
                                 ),
                                 const SizedBox(height: 12),
-                                TextField(
+                              TextField(
                                   controller: _questionController,
                                   decoration: const InputDecoration(
                                     labelText: 'Type your question',
@@ -350,7 +373,12 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                                   final doc = existing.docs.first;
                                                   _existingQuestionId = doc.id;
                                                   _hasSubmitted = true;
-                                                  if (!kIsWeb) {
+                                                  if (kIsWeb) {
+                                                    WebStorage.set(
+                                                      'qid_${session.id}_${authState.user!.id}',
+                                                      doc.id,
+                                                    );
+                                                  } else {
                                                     final prefs =
                                                         await SharedPreferences
                                                             .getInstance();
@@ -398,7 +426,12 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                                 if (!session.allowMultipleQuestions) {
                                                   _existingQuestionId = created.id;
                                                   _hasSubmitted = true;
-                                                  if (!kIsWeb) {
+                                                  if (kIsWeb) {
+                                                    WebStorage.set(
+                                                      'qid_${session.id}_${authState.user!.id}',
+                                                      created.id,
+                                                    );
+                                                  } else {
                                                     final prefs =
                                                         await SharedPreferences
                                                             .getInstance();
@@ -462,6 +495,20 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
                                                   ),
                                                 ),
                                               );
+                                              if (ok) {
+                                                if (kIsWeb) {
+                                                  WebStorage.remove(
+                                                    'draft_${session.id}',
+                                                  );
+                                                } else {
+                                                  final prefs =
+                                                      await SharedPreferences
+                                                          .getInstance();
+                                                  await prefs.remove(
+                                                    'draft_${session.id}',
+                                                  );
+                                                }
+                                              }
                                             }
                                           },
                                     child: _isSubmitting
