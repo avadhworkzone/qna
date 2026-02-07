@@ -32,6 +32,146 @@ class _InfluencerDashboardPageState extends State<InfluencerDashboardPage> {
     }
   }
 
+  Future<void> _openFilterDialog() async {
+    var tempStatus = _statusFilter;
+    var tempDate = _dateFilter;
+    var tempRange = _customRange;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Filters'),
+          content: StatefulBuilder(
+            builder: (context, setDialogState) {
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Status', style: Theme.of(context).textTheme.bodySmall),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _StatusFilter.values.map((value) {
+                        final label = _statusLabel(value);
+                        return ChoiceChip(
+                          selected: tempStatus == value,
+                          label: Text(label),
+                          onSelected: (_) =>
+                              setDialogState(() => tempStatus = value),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                    Text('Date', style: Theme.of(context).textTheme.bodySmall),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _DateFilter.values.map((value) {
+                        final label = _dateLabel(value);
+                        return ChoiceChip(
+                          selected: tempDate == value,
+                          label: Text(label),
+                          onSelected: (_) => setDialogState(() {
+                            tempDate = value;
+                          }),
+                        );
+                      }).toList(),
+                    ),
+                    if (tempDate == _DateFilter.custom) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              tempRange == null
+                                  ? 'No range selected'
+                                  : '${tempRange!.start.month}/${tempRange!.start.day}/${tempRange!.start.year}'
+                                      ' - ${tempRange!.end.month}/${tempRange!.end.day}/${tempRange!.end.year}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              final picked = await showDateRangePicker(
+                                context: context,
+                                firstDate: DateTime(DateTime.now().year - 2),
+                                lastDate: DateTime(DateTime.now().year + 2),
+                              );
+                              if (picked != null) {
+                                setDialogState(() => tempRange = picked);
+                              }
+                            },
+                            child: const Text('Select'),
+                          ),
+                          if (tempRange != null)
+                            IconButton(
+                              onPressed: () =>
+                                  setDialogState(() => tempRange = null),
+                              icon: const Icon(Icons.close, size: 18),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _statusFilter = tempStatus;
+                  _dateFilter = tempDate;
+                  _customRange = tempRange;
+                });
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text('Apply'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _statusLabel(_StatusFilter value) {
+    switch (value) {
+      case _StatusFilter.active:
+        return 'Active';
+      case _StatusFilter.paused:
+        return 'Paused';
+      case _StatusFilter.expired:
+        return 'Expired';
+      case _StatusFilter.all:
+      default:
+        return 'All';
+    }
+  }
+
+  String _dateLabel(_DateFilter value) {
+    switch (value) {
+      case _DateFilter.thisWeek:
+        return 'This Week';
+      case _DateFilter.thisMonth:
+        return 'This Month';
+      case _DateFilter.thisYear:
+        return 'This Year';
+      case _DateFilter.custom:
+        return 'Custom';
+      case _DateFilter.all:
+      default:
+        return 'All';
+    }
+  }
+
   List<Session> _applyFilters(List<Session> sessions) {
     final now = DateTime.now();
     final filteredByStatus = sessions
@@ -76,6 +216,7 @@ class _InfluencerDashboardPageState extends State<InfluencerDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isNarrow = MediaQuery.of(context).size.width < 720;
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, authState) {
         final user = authState.user;
@@ -93,7 +234,7 @@ class _InfluencerDashboardPageState extends State<InfluencerDashboardPage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _DashboardHeader(user: user),
+            _DashboardHeader(user: user, isNarrow: isNarrow),
         if (user.sessionCredits <= 0) ...[
           const SizedBox(height: 12),
           GlassCard(
@@ -114,41 +255,73 @@ class _InfluencerDashboardPageState extends State<InfluencerDashboardPage> {
             ),
           ),
         ],
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Text('Your Sessions', style: Theme.of(context).textTheme.headlineMedium),
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: () => context.go('/sessions'),
-                  icon: const Icon(Icons.list),
-                  label: const Text('View All'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _FiltersRow(
-              statusFilter: _statusFilter,
-              dateFilter: _dateFilter,
-              customRange: _customRange,
-              onStatusChanged: (value) => setState(() => _statusFilter = value),
-              onDateChanged: (value) => setState(() => _dateFilter = value),
-              onCustomRangeTap: () async {
-                final picked = await showDateRangePicker(
-                  context: context,
-                  firstDate: DateTime(DateTime.now().year - 2),
-                  lastDate: DateTime(DateTime.now().year + 2),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _customRange = picked;
-                    _dateFilter = _DateFilter.custom;
-                  });
-                }
-              },
-              onClearCustomRange: () => setState(() => _customRange = null),
-            ),
-            const SizedBox(height: 16),
+            SizedBox(height: isNarrow ? 12 : 24),
+            if (isNarrow) ...[
+              Row(
+                children: [
+                  Text('Sessions',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const Spacer(),
+                  GlassCard(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: IconButton(
+                      onPressed: _openFilterDialog,
+                      icon: const Icon(Icons.tune),
+                      tooltip: 'Filters',
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GlassCard(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: IconButton(
+                      onPressed: () => context.go('/sessions'),
+                      icon: const Icon(Icons.list),
+                      tooltip: 'View all',
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              Row(
+                children: [
+                  Text('Your Sessions',
+                      style: Theme.of(context).textTheme.headlineMedium),
+                  const Spacer(),
+                  TextButton.icon(
+                    onPressed: () => context.go('/sessions'),
+                    icon: const Icon(Icons.list),
+                    label: const Text('View All'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _FiltersRow(
+                statusFilter: _statusFilter,
+                dateFilter: _dateFilter,
+                customRange: _customRange,
+                onStatusChanged: (value) =>
+                    setState(() => _statusFilter = value),
+                onDateChanged: (value) =>
+                    setState(() => _dateFilter = value),
+                onCustomRangeTap: () async {
+                  final picked = await showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(DateTime.now().year - 2),
+                    lastDate: DateTime(DateTime.now().year + 2),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _customRange = picked;
+                      _dateFilter = _DateFilter.custom;
+                    });
+                  }
+                },
+                onClearCustomRange: () => setState(() => _customRange = null),
+              ),
+            ],
+            SizedBox(height: isNarrow ? 8 : 16),
             Expanded(
               child: BlocBuilder<SessionsCubit, SessionsState>(
                 builder: (context, state) {
@@ -183,12 +356,22 @@ class _InfluencerDashboardPageState extends State<InfluencerDashboardPage> {
                               : width > 620
                                   ? 2
                                   : 1;
+                      final isMobile = width < 520;
+                      final aspectRatio = isMobile
+                          ? 3.2
+                          : width > 1100
+                              ? 1.9
+                              : width > 900
+                                  ? 1.9
+                                  : width > 620
+                                      ? 2.2
+                                      : 2.6;
                       return GridView.builder(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: crossAxisCount,
                           crossAxisSpacing: 16,
                           mainAxisSpacing: 16,
-                          childAspectRatio: 1.9,
+                          childAspectRatio: aspectRatio,
                         ),
                         itemCount: filteredSessions.length,
                         itemBuilder: (context, index) {
@@ -213,28 +396,28 @@ class _InfluencerDashboardPageState extends State<InfluencerDashboardPage> {
 
 
 class _DashboardHeader extends StatelessWidget {
-  const _DashboardHeader({required this.user});
+  const _DashboardHeader({required this.user, required this.isNarrow});
 
   final User user;
+  final bool isNarrow;
 
   @override
   Widget build(BuildContext context) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          final isNarrow = constraints.maxWidth < 720;
           final headerRow = [
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircleAvatar(
-                  radius: 26,
+                  radius: isNarrow ? 20 : 26,
                   backgroundImage:
                       user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
                   child: user.photoUrl == null
-                      ? const Icon(Icons.person, size: 26)
+                      ? Icon(Icons.person, size: isNarrow ? 20 : 26)
                       : null,
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: isNarrow ? 8 : 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -242,7 +425,9 @@ class _DashboardHeader extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodySmall),
                     Text(
                       user.name,
-                      style: Theme.of(context).textTheme.displaySmall,
+                      style: isNarrow
+                          ? Theme.of(context).textTheme.titleLarge
+                          : Theme.of(context).textTheme.displaySmall,
                     ),
                   ],
                 ),
@@ -451,13 +636,14 @@ class _SessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isNarrow = MediaQuery.of(context).size.width < 520;
     final statusColor =
         session.isActive ? AppTheme.successColor : AppTheme.warningColor;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: GlassCard(
-        padding: const EdgeInsets.all(18),
+        padding: EdgeInsets.all(isNarrow ? 12 : 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -466,13 +652,18 @@ class _SessionCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     session.title,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: isNarrow
+                        ? Theme.of(context).textTheme.titleMedium
+                        : Theme.of(context).textTheme.headlineSmall,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isNarrow ? 8 : 10,
+                    vertical: isNarrow ? 4 : 6,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
@@ -485,30 +676,26 @@ class _SessionCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: isNarrow ? 6 : 8),
             Text(
               session.description,
-              maxLines: 2,
+              maxLines: isNarrow ? 1 : 2,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const Spacer(),
-            Row(
-              children: [
-                Text(
-                  _formatDateTime(session.startTime),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+            Text(
+              _formatDateTime(session.startTime),
+              style: Theme.of(context).textTheme.bodySmall,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                Text(
-                  _formatDateTime(session.expiryTime),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+            SizedBox(height: isNarrow ? 4 : 6),
+            Text(
+              _formatDateTime(session.expiryTime),
+              style: Theme.of(context).textTheme.bodySmall,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

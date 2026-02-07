@@ -52,5 +52,5 @@ class AppConstants {
   static const double cardElevation = 4.0;
 
   // Feature flags
-  static const bool enableAudiencePools = true;
+  static const bool enableAudiencePools = false;
 }
