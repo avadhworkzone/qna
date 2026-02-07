@@ -7,6 +7,7 @@ import '../../core/constants/app_constants.dart';
 import '../bloc/auth/auth_cubit.dart';
 import '../bloc/auth/auth_state.dart';
 import '../widgets/glass_card.dart';
+import '../widgets/app_background.dart';
 
 class InfluencerShell extends StatefulWidget {
   const InfluencerShell({
@@ -81,22 +82,7 @@ class _InfluencerShellState extends State<InfluencerShell> {
               icon: const Icon(Icons.add),
             )
           : null,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: Theme.of(context).brightness == Brightness.light
-                ? [
-                    const Color(0xFFF7F8FB),
-                    const Color(0xFFEFF2F8),
-                  ]
-                : [
-                    const Color(0xFF0B1021),
-                    const Color(0xFF0F1B33),
-                  ],
-          ),
-        ),
+      body: AppBackground(
         child: LayoutBuilder(
           builder: (context, constraints) {
             return Row(

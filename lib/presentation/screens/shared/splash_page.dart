@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
+import '../../widgets/app_background.dart';
 
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
@@ -8,18 +8,8 @@ class SplashPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.backgroundColor,
-              AppTheme.surfaceColor.withOpacity(0.9),
-            ],
-          ),
-        ),
-        child: const Center(
+      body: const AppBackground(
+        child: Center(
           child: CircularProgressIndicator(),
         ),
       ),

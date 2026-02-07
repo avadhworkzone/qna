@@ -20,6 +20,7 @@ import '../../bloc/questions/questions_cubit.dart';
 import '../../bloc/polls/polls_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../widgets/app_background.dart';
 
 class PublicSessionPage extends StatefulWidget {
   const PublicSessionPage({super.key, required this.publicLink});
@@ -195,23 +196,7 @@ class _PublicSessionPageState extends State<PublicSessionPage> {
             _loadedUserId = authState.user?.id;
             _loadDraft(session.id, _loadedUserId);
           }
-          final isLight = Theme.of(context).brightness == Brightness.light;
-          return Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isLight
-                    ? [
-                        const Color(0xFFF7F8FB),
-                        const Color(0xFFFFFFFF),
-                      ]
-                    : [
-                        const Color(0xFF0B1021),
-                        const Color(0xFF111A2F),
-                      ],
-              ),
-            ),
+          return AppBackground(
             child: SafeArea(
               child: Center(
                 child: ConstrainedBox(

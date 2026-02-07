@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../domain/entities/user.dart';
 import '../../bloc/auth/auth_cubit.dart';
 import '../../bloc/auth/auth_state.dart';
+import '../../widgets/app_background.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,54 +18,15 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              isLight ? const Color(0xFFF7F8FB) : AppTheme.backgroundColor,
-              isLight
-                  ? const Color(0xFFFFFFFF)
-                  : AppTheme.surfaceColor.withOpacity(0.95),
-            ],
-          ),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              right: -120,
-              top: -80,
-              child: Container(
-                width: 260,
-                height: 260,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppTheme.accentColor.withOpacity(isLight ? 0.12 : 0.15),
-                ),
-              ),
-            ),
-            Positioned(
-              left: -80,
-              bottom: -60,
-              child: Container(
-                width: 220,
-                height: 220,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppTheme.secondaryColor.withOpacity(isLight ? 0.1 : 0.12),
-                ),
-              ),
-            ),
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1000),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
+      body: AppBackground(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1000),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
                       final isWide = constraints.maxWidth > 820;
                       final content = [
                         Expanded(
@@ -170,12 +132,10 @@ class _LoginPageState extends State<LoginPage> {
                       return isWide
                           ? Row(children: content)
                           : Column(children: content);
-                    },
-                  ),
-                ),
+                },
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
