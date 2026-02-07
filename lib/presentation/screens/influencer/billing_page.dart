@@ -105,6 +105,8 @@ class BillingPage extends StatelessWidget {
 
     final user = context.watch<AuthCubit>().state.user;
     final credits = user?.sessionCredits ?? 0;
+    final freeCreditsRemaining = user?.freeCreditsRemaining ?? 0;
+    final hasFreeCredits = freeCreditsRemaining > 0;
 
     return BlocListener<BillingCubit, BillingState>(
         listener: (context, state) async {
@@ -150,7 +152,7 @@ class BillingPage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.account_balance_wallet_outlined),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -158,9 +160,38 @@ class BillingPage extends StatelessWidget {
                           'Credits',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
-                        Text(
-                          credits.toString(),
-                          style: Theme.of(context).textTheme.headlineSmall,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              credits.toString(),
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            if (hasFreeCredits) ...[
+                              const SizedBox(width: 10),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.teal.withOpacity(0.16),
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(
+                                    color: Colors.teal.withOpacity(0.35),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.card_giftcard, size: 14),
+                                    const SizedBox(width: 6),
+                                    Text('$freeCreditsRemaining free'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ],
                     ),

@@ -9,6 +9,9 @@ class UserModel extends User {
     required super.role,
     super.subscriptionPlan,
     required super.sessionCredits,
+    required super.freeCreditsGranted,
+    required super.freeCreditsAmount,
+    required super.freeCreditsRemaining,
     required super.createdAt,
     super.lastLoginAt,
   });
@@ -25,6 +28,10 @@ class UserModel extends User {
       ),
       subscriptionPlan: json['subscriptionPlan'] as String?,
       sessionCredits: (json['sessionCredits'] as num?)?.toInt() ?? 0,
+      freeCreditsGranted: json['freeCreditsGranted'] == true,
+      freeCreditsAmount: (json['freeCreditsAmount'] as num?)?.toInt() ?? 0,
+      freeCreditsRemaining:
+          (json['freeCreditsRemaining'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String),
       lastLoginAt: json['lastLoginAt'] != null
           ? DateTime.parse(json['lastLoginAt'] as String)
@@ -41,6 +48,9 @@ class UserModel extends User {
       'role': role.name,
       'subscriptionPlan': subscriptionPlan,
       'sessionCredits': sessionCredits,
+      'freeCreditsGranted': freeCreditsGranted,
+      'freeCreditsAmount': freeCreditsAmount,
+      'freeCreditsRemaining': freeCreditsRemaining,
       'createdAt': createdAt.toIso8601String(),
       'lastLoginAt': lastLoginAt?.toIso8601String(),
     };
@@ -55,6 +65,9 @@ class UserModel extends User {
       role: user.role,
       subscriptionPlan: user.subscriptionPlan,
       sessionCredits: user.sessionCredits,
+      freeCreditsGranted: user.freeCreditsGranted,
+      freeCreditsAmount: user.freeCreditsAmount,
+      freeCreditsRemaining: user.freeCreditsRemaining,
       createdAt: user.createdAt,
       lastLoginAt: user.lastLoginAt,
     );
@@ -72,6 +85,10 @@ class UserModel extends User {
       ),
       subscriptionPlan: data['subscriptionPlan'],
       sessionCredits: data['sessionCredits'] ?? 0,
+      freeCreditsGranted: data['freeCreditsGranted'] == true,
+      freeCreditsAmount: (data['freeCreditsAmount'] as num?)?.toInt() ?? 0,
+      freeCreditsRemaining:
+          (data['freeCreditsRemaining'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.fromMillisecondsSinceEpoch(
         (data['createdAt'] as num?)?.toInt() ?? 0,
       ),
@@ -91,6 +108,9 @@ class UserModel extends User {
       'role': role.name,
       'subscriptionPlan': subscriptionPlan,
       'sessionCredits': sessionCredits,
+      'freeCreditsGranted': freeCreditsGranted,
+      'freeCreditsAmount': freeCreditsAmount,
+      'freeCreditsRemaining': freeCreditsRemaining,
       'createdAt': createdAt.millisecondsSinceEpoch,
       'lastLoginAt': lastLoginAt?.millisecondsSinceEpoch,
     };

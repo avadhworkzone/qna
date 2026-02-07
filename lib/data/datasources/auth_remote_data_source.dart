@@ -56,14 +56,71 @@ class AuthRemoteDataSource {
     if (current == null) {
       throw StateError('No authenticated user');
     }
+
+    // Remote-configurable free credits. Uses manage/setting.freeCredit only.
+    // Falls back to 2 if config is missing or unreadable due to rules.
+    var freeOrganizerCredits = 2;
+    try {
+      final legacySnap =
+          await _firestore.collection('manage').doc('setting').get();
+      final fromLegacy = (legacySnap.data()?['freeCredit'] as num?)?.toInt();
+      if (fromLegacy != null) freeOrganizerCredits = fromLegacy;
+    } catch (_) {
+      // Intentionally ignore and use default.
+    }
     final docRef = _firestore.collection(FirestorePaths.users).doc(current.uid);
     final snapshot = await docRef.get();
     if (snapshot.exists) {
       final data = snapshot.data() ?? {};
       final currentRole = data['role'] ?? UserRole.user.name;
+      final freeGranted = data['freeCreditsGranted'] == true;
+      final existingCredits = (data['sessionCredits'] as num?)?.toInt() ?? 0;
+      final existingFreeAmount = (data['freeCreditsAmount'] as num?)?.toInt();
+      final existingFreeRemaining =
+          (data['freeCreditsRemaining'] as num?)?.toInt();
+      final freeApplied = data['freeCreditsApplied'] == true;
       final updates = <String, dynamic>{
         'lastLoginAt': DateTime.now().millisecondsSinceEpoch,
       };
+
+      // Ensure the user doc always has a freeCreditsAmount field for consistent UI.
+      if (role == UserRole.influencer && existingFreeAmount == null) {
+        updates['freeCreditsAmount'] = freeGranted ? freeOrganizerCredits : 0;
+      }
+      // Ensure the remaining counter exists so "free" can decrement separately.
+      if (role == UserRole.influencer && existingFreeRemaining == null) {
+        final amount = existingFreeAmount ?? (freeGranted ? freeOrganizerCredits : 0);
+        // Best-effort: remaining cannot exceed total credits.
+        updates['freeCreditsRemaining'] =
+            amount <= 0 ? 0 : (existingCredits < amount ? existingCredits : amount);
+      }
+
+      // One-time: grant the configured free credits to organizers.
+      // We track "freeCreditsApplied" separately to repair older accounts that had
+      // freeCreditsGranted=true but never received sessionCredits.
+      if (role == UserRole.influencer &&
+          !freeGranted &&
+          freeOrganizerCredits > 0) {
+        updates['sessionCredits'] = existingCredits >= freeOrganizerCredits
+            ? existingCredits
+            : freeOrganizerCredits;
+        updates['freeCreditsGranted'] = true;
+        updates['freeCreditsAmount'] = freeOrganizerCredits;
+        updates['freeCreditsRemaining'] = freeOrganizerCredits;
+        updates['freeCreditsApplied'] = true;
+      } else if (role == UserRole.influencer &&
+          freeGranted &&
+          !freeApplied) {
+        final amount = existingFreeAmount ?? freeOrganizerCredits;
+        if (amount > 0) {
+          updates['sessionCredits'] =
+              existingCredits >= amount ? existingCredits : amount;
+        }
+        updates['freeCreditsAmount'] = amount > 0 ? amount : 0;
+        updates['freeCreditsRemaining'] =
+            amount <= 0 ? 0 : (existingCredits < amount ? existingCredits : amount);
+        updates['freeCreditsApplied'] = true;
+      }
       if (currentRole != role.name && role == UserRole.influencer) {
         updates['role'] = role.name;
       }
@@ -77,11 +134,21 @@ class AuthRemoteDataSource {
       photoUrl: current.photoURL,
       role: role,
       subscriptionPlan: null,
-      sessionCredits: role == UserRole.influencer ? 0 : 0,
+      sessionCredits: role == UserRole.influencer ? freeOrganizerCredits : 0,
+      freeCreditsGranted:
+          role == UserRole.influencer && freeOrganizerCredits > 0,
+      freeCreditsAmount: role == UserRole.influencer ? freeOrganizerCredits : 0,
+      freeCreditsRemaining:
+          role == UserRole.influencer ? freeOrganizerCredits : 0,
       createdAt: DateTime.now(),
       lastLoginAt: DateTime.now(),
     );
-    await docRef.set(userModel.toFirestore());
+    await docRef.set({
+      ...userModel.toFirestore(),
+      if (role == UserRole.influencer && freeOrganizerCredits > 0)
+        'freeCreditsGranted': true,
+      if (role == UserRole.influencer) 'freeCreditsApplied': freeOrganizerCredits > 0,
+    });
     return userModel;
   }
 }

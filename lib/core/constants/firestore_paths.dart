@@ -7,4 +7,5 @@ class FirestorePaths {
   static const String audiencePools = 'audiencePools';
   static const String questionDuplicates = 'questionDuplicates';
   static const String analytics = 'analytics';
+  static const String appConfig = 'appConfig';
 }

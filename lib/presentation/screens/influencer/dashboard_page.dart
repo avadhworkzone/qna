@@ -439,8 +439,46 @@ class _DashboardHeader extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.account_balance_wallet_outlined),
-                  const SizedBox(width: 8),
-                  Text('Credits: ${user.sessionCredits}'),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Credits', style: Theme.of(context).textTheme.bodySmall),
+                      const SizedBox(height: 2),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('${user.sessionCredits}',
+                              style: Theme.of(context).textTheme.titleMedium),
+                          if (user.freeCreditsRemaining > 0) ...[
+                            const SizedBox(width: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.teal.withOpacity(0.16),
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(
+                                  color: Colors.teal.withOpacity(0.35),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.card_giftcard, size: 14),
+                                  const SizedBox(width: 6),
+                                  Text('${user.freeCreditsRemaining} free'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

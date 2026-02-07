@@ -6,6 +6,9 @@ class User {
   final UserRole role;
   final String? subscriptionPlan;
   final int sessionCredits;
+  final bool freeCreditsGranted;
+  final int freeCreditsAmount;
+  final int freeCreditsRemaining;
   final DateTime createdAt;
   final DateTime? lastLoginAt;
 
@@ -17,6 +20,9 @@ class User {
     required this.role,
     this.subscriptionPlan,
     required this.sessionCredits,
+    required this.freeCreditsGranted,
+    required this.freeCreditsAmount,
+    required this.freeCreditsRemaining,
     required this.createdAt,
     this.lastLoginAt,
   });
@@ -29,6 +35,9 @@ class User {
     UserRole? role,
     String? subscriptionPlan,
     int? sessionCredits,
+    bool? freeCreditsGranted,
+    int? freeCreditsAmount,
+    int? freeCreditsRemaining,
     DateTime? createdAt,
     DateTime? lastLoginAt,
   }) {
@@ -40,6 +49,9 @@ class User {
       role: role ?? this.role,
       subscriptionPlan: subscriptionPlan ?? this.subscriptionPlan,
       sessionCredits: sessionCredits ?? this.sessionCredits,
+      freeCreditsGranted: freeCreditsGranted ?? this.freeCreditsGranted,
+      freeCreditsAmount: freeCreditsAmount ?? this.freeCreditsAmount,
+      freeCreditsRemaining: freeCreditsRemaining ?? this.freeCreditsRemaining,
       createdAt: createdAt ?? this.createdAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
     );

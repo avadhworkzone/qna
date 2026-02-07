@@ -12,7 +12,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Stream<User?> authStateChanges() {
     return _remote.authStateChanges().asyncMap((fbUser) async {
       if (fbUser == null) return null;
-      return _remote.ensureUserProfile(UserRole.user);
+      // Keep whatever role is already stored in Firestore; do not downgrade
+      // organizers to "user" on auth state refresh.
+      return _remote.ensureUserProfile(UserRole.influencer);
     });
   }
 
@@ -20,19 +22,19 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<User?> getCurrentUser() async {
     final fbUser = _remote.getCurrentUser();
     if (fbUser == null) return null;
-    return _remote.ensureUserProfile(UserRole.user);
+    return _remote.ensureUserProfile(UserRole.influencer);
   }
 
   @override
   Future<User> signInWithGoogle() async {
     await _remote.signInWithGoogle();
-    return _remote.ensureUserProfile(UserRole.user);
+    return _remote.ensureUserProfile(UserRole.influencer);
   }
 
   @override
   Future<User> signInWithApple() async {
     await _remote.signInWithApple();
-    return _remote.ensureUserProfile(UserRole.user);
+    return _remote.ensureUserProfile(UserRole.influencer);
   }
 
   @override

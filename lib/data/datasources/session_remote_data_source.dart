@@ -63,11 +63,19 @@ class SessionRemoteDataSource {
     await _firestore.runTransaction((tx) async {
       final userSnap = await tx.get(userRef);
       final credits = (userSnap.data()?['sessionCredits'] as num?)?.toInt() ?? 0;
+      final freeRemaining =
+          (userSnap.data()?['freeCreditsRemaining'] as num?)?.toInt() ?? 0;
       if (credits <= 0) {
         throw StateError('No session credits available.');
       }
       tx.set(docRef, model.toFirestore());
-      tx.update(userRef, {'sessionCredits': FieldValue.increment(-1)});
+      final updates = <String, dynamic>{
+        'sessionCredits': FieldValue.increment(-1),
+      };
+      if (freeRemaining > 0) {
+        updates['freeCreditsRemaining'] = FieldValue.increment(-1);
+      }
+      tx.update(userRef, updates);
     });
 
     return model;

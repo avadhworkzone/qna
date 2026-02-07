@@ -68,5 +68,11 @@ service cloud.firestore {
         allow update, delete: if isSignedIn() && request.auth.uid == organizerId;
       }
     }
+
+    // Legacy config used during development (manage/setting.freeCredit).
+    match /manage/{docId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if false;
+    }
   }
 }
